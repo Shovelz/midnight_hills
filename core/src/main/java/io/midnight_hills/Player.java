@@ -70,22 +70,22 @@ public class Player {
         velocity.y = 0;
         state = State.IDLE;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             velocity.x = -1;
             direction = Direction.LEFT;
             state = State.WALK;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             velocity.x = 1;
             direction = Direction.RIGHT;
             state = State.WALK;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             velocity.y = 1;
             direction = Direction.UP;
             state = State.WALK;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             velocity.y = -1;
             direction = Direction.DOWN;
             state = State.WALK;
