@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -66,6 +67,10 @@ public class GameScreen implements Screen {
     private Environment environment;
     private ModelInstance screenInstance;
     private FreeLookCameraController cameraController;
+    private PointLight pl;
+
+    private Model lightDebugModel;
+    private ModelInstance lightDebugInstance;
 
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
@@ -137,44 +142,8 @@ public class GameScreen implements Screen {
         fbRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
         fbRegion.flip(false, true);
 
+        frameBuffer.bind();
 
-        //Get polygons from tilemap and use for shadows, need to get framebuffer working before making this 3d
-//        for (MapObject object : map.getLayers().get("Shadows").getObjects()) {
-//            if (object instanceof PolygonMapObject) {
-//
-//
-//                Polygon polygon = ((PolygonMapObject) object).getPolygon();
-//
-//                BodyDef bodyDef = new BodyDef();
-//                bodyDef.type = BodyDef.BodyType.StaticBody;
-//                bodyDef.position.set(polygon.getX(), polygon.getY());
-//                points.add(new Vector2(polygon.getX(), polygon.getY()));
-//
-//                Body boxBody = shadowWorld.createBody(bodyDef);
-//
-//                float[] vertices = polygon.getVertices();
-//                FloatArray verts = new FloatArray(polygon.getVertices());
-//                ShortArray indices = new EarClippingTriangulator().computeTriangles(verts);
-//
-//                for (int i = 0; i < indices.size; i += 3) {
-//                    float[] tri = new float[6];
-//                    for (int j = 0; j < 3; j++) {
-//                        int idx = indices.get(i + j) * 2;
-//                        tri[j*2]     = verts.get(idx);
-//                        tri[j*2 + 1] = verts.get(idx + 1);
-//                    }
-//
-//                    PolygonShape shape = new PolygonShape();
-//                    shape.set(tri);
-//                Fixture fixture = boxBody.createFixture(shape, 0f);
-//
-//                LightData data = new LightData(0.5f);
-//                fixture.setUserData(data);
-//                    shape.dispose();
-//                }
-//
-//            }
-//        }
 
         font = new BitmapFont();
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
@@ -184,12 +153,8 @@ public class GameScreen implements Screen {
         modelBatch = new ModelBatch();
         ModelBuilder modelBuilder = new ModelBuilder();
 
-//        Material material = new Material(
-//            TextureAttribute.createDiffuse(frameBuffer.getColorBufferTexture())
-//        );
-
         Material material = new Material(
-            TextureAttribute.createEmissive(frameBuffer.getColorBufferTexture())
+            TextureAttribute.createDiffuse(frameBuffer.getColorBufferTexture())
         );
 
         screenModel = modelBuilder.createRect(
@@ -210,14 +175,26 @@ public class GameScreen implements Screen {
         screenInstance.transform.scale(8f, 4.5f, 1f);
 
         environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 0.6f, 1f));
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 0.8f));
         environment.add(
             new DirectionalLight().set(
-                1f, 0.6f, 0.8f,   // light color
-                -0.2f, -1f, -0.3f // direction (POINTING FROM light → surface)
+                1f, 0.6f, 0.8f,
+                -10f, -2f, -4f
             )
         );
 
+        //Point light and red ball for debugging where the light is
+        pl = new PointLight().set(new Color(1, 1, 1, 1), new Vector3(1, 2, 1), 1000f);
+        environment.add(pl);
+
+        lightDebugModel = modelBuilder.createSphere(
+            0.1f, 0.1f, 0.1f, // radius x,y,z
+            10, 10, // divisions
+            new Material(ColorAttribute.createDiffuse(Color.RED)),
+            VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal
+        );
+
+        lightDebugInstance = new ModelInstance(lightDebugModel);
 
         cameraController = new FreeLookCameraController(persCamera);
         Gdx.input.setCursorCatched(true);
@@ -318,29 +295,16 @@ public class GameScreen implements Screen {
         Gdx.gl.glDisable(GL20.GL_BLEND);
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
         modelBatch.begin(persCamera);
+
         modelBatch.render(screenInstance, environment);
+        //Debug point light
+        lightDebugInstance.transform.setToTranslation(pl.position);
+        modelBatch.render(lightDebugInstance);
         modelBatch.end();
 
         persCamera.update();
 
-        //Shader for clouds, currently not in use
-//        batch.setShader(null);
-//        Gdx.gl.glUseProgram(0);
-////        batch.setShader(shaderProgram);
-//        batch.setProjectionMatrix(screenCamera.combined);
-//        batch.begin();
 
-//        fbRegion.getTexture().bind(0);
-//        shaderProgram.setUniformi("u_texture", 0);
-//        noiseTexture.bind(1);
-//        shaderProgram.setUniformi("u_noiseTexture", 1);
-//        shaderProgram.setUniformf("u_time", time);
-//        shaderProgram.setUniformf("u_resolution", screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
-
-//        batch.draw(fbRegion, 0, 0, screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
-//
-//        batch.end();
-//        batch.setShader(null);
     }
 
     @Override
@@ -377,3 +341,62 @@ public class GameScreen implements Screen {
         // Destroy screen's assets here.
     }
 }
+
+
+//Get polygons from tilemap and use for shadows, need to get framebuffer working before making this 3d
+//        for (MapObject object : map.getLayers().get("Shadows").getObjects()) {
+//            if (object instanceof PolygonMapObject) {
+//
+//
+//                Polygon polygon = ((PolygonMapObject) object).getPolygon();
+//
+//                BodyDef bodyDef = new BodyDef();
+//                bodyDef.type = BodyDef.BodyType.StaticBody;
+//                bodyDef.position.set(polygon.getX(), polygon.getY());
+//                points.add(new Vector2(polygon.getX(), polygon.getY()));
+//
+//                Body boxBody = shadowWorld.createBody(bodyDef);
+//
+//                float[] vertices = polygon.getVertices();
+//                FloatArray verts = new FloatArray(polygon.getVertices());
+//                ShortArray indices = new EarClippingTriangulator().computeTriangles(verts);
+//
+//                for (int i = 0; i < indices.size; i += 3) {
+//                    float[] tri = new float[6];
+//                    for (int j = 0; j < 3; j++) {
+//                        int idx = indices.get(i + j) * 2;
+//                        tri[j*2]     = verts.get(idx);
+//                        tri[j*2 + 1] = verts.get(idx + 1);
+//                    }
+//
+//                    PolygonShape shape = new PolygonShape();
+//                    shape.set(tri);
+//                Fixture fixture = boxBody.createFixture(shape, 0f);
+//
+//                LightData data = new LightData(0.5f);
+//                fixture.setUserData(data);
+//                    shape.dispose();
+//                }
+//
+//            }
+//        }
+
+
+//Shader for clouds, currently not in use
+//        batch.setShader(null);
+//        Gdx.gl.glUseProgram(0);
+////        batch.setShader(shaderProgram);
+//        batch.setProjectionMatrix(screenCamera.combined);
+//        batch.begin();
+
+//        fbRegion.getTexture().bind(0);
+//        shaderProgram.setUniformi("u_texture", 0);
+//        noiseTexture.bind(1);
+//        shaderProgram.setUniformi("u_noiseTexture", 1);
+//        shaderProgram.setUniformf("u_time", time);
+//        shaderProgram.setUniformf("u_resolution", screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
+
+//        batch.draw(fbRegion, 0, 0, screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
+//
+//        batch.end();
+//        batch.setShader(null);
