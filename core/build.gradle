@@ -8,6 +8,7 @@ dependencies {
   api "com.crashinvaders.vfx:gdx-vfx-effects:$gdxVfxEffectsVersion"
   api "com.github.tommyettinger:anim8-gdx:$anim8Version"
   api "com.kotcrab.vis:vis-ui:$visUiVersion"
+  api "com.github.mgsx-dev.gdx-gltf:gltf:+"
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"

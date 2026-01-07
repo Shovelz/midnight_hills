@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.environment.ShadowMap;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -140,7 +141,6 @@ public class GameScreen implements Screen {
             false);
 
         backgroundRegion = new TextureRegion(backgroundBuffer.getColorBufferTexture());
-        backgroundRegion.flip(false, true);
 
         foregroundBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
             Gdx.graphics.getWidth(),
@@ -148,7 +148,6 @@ public class GameScreen implements Screen {
             false);
 
         foregroundRegion = new TextureRegion(backgroundBuffer.getColorBufferTexture());
-        foregroundRegion.flip(false, true);
 
 
         modelBatch = new ModelBatch();
@@ -211,10 +210,11 @@ public class GameScreen implements Screen {
 
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.3f, 0.3f, 0.3f, 1f));
-        sun = new DirectionalShadowLight(1024, 1024, 40f, 40f, 1f, 50f);
+        sun = new DirectionalShadowLight(4096,4096, 35f, 35f, 1f, 50f);
         sun.set(2f, 2f, 2f, -1f, -1f, -1f);
 
-        rotatingLight = new PointLight().set(Color.GREEN, new Vector3(0f, 6f, 0f), 20f); // initial position above the quads
+        environment.shadowMap = sun;
+        rotatingLight = new PointLight().set(Color.GREEN, new Vector3(0f, 6f, 0f), 200f); // initial position above the quads
 
 
         debugBallModel = modelBuilder.createSphere(
@@ -224,7 +224,8 @@ public class GameScreen implements Screen {
         );
 
         debugBallInstance = new ModelInstance(debugBallModel);
-        environment.add(rotatingLight);
+        //Just commented out the point light
+//        environment.add(rotatingLight);
 
         environment.add(sun);
 
@@ -249,11 +250,12 @@ public class GameScreen implements Screen {
 
         bottomLayerInstance.transform.idt();
         bottomLayerInstance.transform.translate(0f, 0f, 0f);
-        bottomLayerInstance.transform.scale(width / 2f, height / 2f, 1f);
+        bottomLayerInstance.transform.scale(width / 2f, -height / 2f, 1f);
 
         topLayerInstance.transform.idt();
-        topLayerInstance.transform.translate(0f, 0f, 2f);
-        topLayerInstance.transform.scale(width / 2f, height / 2f, 1f);
+        topLayerInstance.transform.translate(0f, 0f, 1f);
+        topLayerInstance.transform.scale(width / 2f, -height / 2f, 1f);
+
     }
 
 
@@ -310,23 +312,24 @@ public class GameScreen implements Screen {
 
 
         //DirectionShadowLight (sun) position
-        float angle2 = lightTime * 0.5f * MathUtils.PI2;
+        float angle2 = lightTime * 0.3f * MathUtils.PI2;
         float x2 = MathUtils.cos(angle2);
-        float y2 = 1f; // slightly above
+        float y2 = 0.5f; // slightly above
         float z2 = MathUtils.sin(angle2);
         sun.setDirection(x2, y2, z2);
 
         //Point light and debug ball position
         lightTime += delta;
         float radius = 5f;
-        float speed = 0.5f;  // rotations per 10 seconds
+        float speed = 0.2f;  // rotations per 10 seconds
 
         float angle = lightTime * speed * MathUtils.PI2;
 
         float x = MathUtils.cos(angle) * radius;
         float z = MathUtils.sin(angle) * radius;
         float y = 3f;
-        rotatingLight.position.set(x, y, z);
+        //Dont worry about the point light, Im not rendering it
+//        rotatingLight.position.set(x, y, z);
         debugBallInstance.transform.setTranslation(rotatingLight.position);
 
 
@@ -374,7 +377,7 @@ public class GameScreen implements Screen {
 
         // Normal scene pass
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         //Set the instance textures to backgroundBuffer and foregroundBuffer
         bottomLayerAttr.textureDescription.set(backgroundRegion.getTexture(), Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
@@ -385,7 +388,13 @@ public class GameScreen implements Screen {
 
         modelBatch.begin(persCamera);
         modelBatch.render(bottomLayerInstance, environment);
+        // disable shadow receiving (this doesnt work for some reason)
+        ShadowMap shadowBackup = environment.shadowMap;
+        environment.shadowMap = null;
         modelBatch.render(topLayerInstance, environment);
+        environment.shadowMap = shadowBackup;
+//        bottomLayerInstance.transform.idt();
+//        bottomLayerInstance.transform.translate(0f, 0f, 4f);
         modelBatch.render(debugBallInstance);
         modelBatch.end();
 
@@ -404,12 +413,10 @@ public class GameScreen implements Screen {
         if (backgroundBuffer != null) backgroundBuffer.dispose();
         backgroundBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
         backgroundRegion = new TextureRegion(backgroundBuffer.getColorBufferTexture());
-        backgroundRegion.flip(false, true);
 
         if (foregroundBuffer != null) foregroundBuffer.dispose();
         foregroundBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
         foregroundRegion = new TextureRegion(foregroundBuffer.getColorBufferTexture());
-        foregroundRegion.flip(false, true);
 
     }
 
