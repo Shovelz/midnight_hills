@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.*;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.environment.ShadowMap;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -150,7 +152,13 @@ public class GameScreen implements Screen {
         foregroundRegion = new TextureRegion(backgroundBuffer.getColorBufferTexture());
 
 
-        modelBatch = new ModelBatch();
+
+        String vertexSource = Gdx.files.internal("shaders/my.vertex.glsl").readString();
+        String fragmentSource = Gdx.files.internal("shaders/my.fragment.glsl").readString();
+
+        DefaultShader.Config config = new DefaultShader.Config(vertexSource, fragmentSource);
+
+        modelBatch = new ModelBatch(new DefaultShaderProvider(config));
         shadowBatch = new ModelBatch(new DepthShaderProvider());
 
         ModelBuilder modelBuilder = new ModelBuilder();
@@ -182,6 +190,7 @@ public class GameScreen implements Screen {
 
 
         Material topMaterial = new Material("foreground", TextureAttribute.createDiffuse(foregroundBuffer.getColorBufferTexture()), FloatAttribute.createAlphaTest(0.5f), IntAttribute.createCullFace(GL20.GL_NONE));
+//        Material topMaterial = new Material("foreground", TextureAttribute.createDiffuse(foregroundBuffer.getColorBufferTexture()), FloatAttribute.createAlphaTest(0.5f), IntAttribute.createCullFace(GL20.GL_NONE));
         topMaterial.set(
             new BlendingAttribute(
                 GL20.GL_SRC_ALPHA,
@@ -230,8 +239,8 @@ public class GameScreen implements Screen {
         environment.add(sun);
 
 
-        cameraController = new FreeLookCameraController(persCamera);
-        Gdx.input.setCursorCatched(true);
+//        cameraController = new FreeLookCameraController(persCamera);
+//        Gdx.input.setCursorCatched(true);
 
         persCamera.position.set(0f, 0f, 12f);
         persCamera.direction.set(0, 0, -1f);
@@ -253,7 +262,7 @@ public class GameScreen implements Screen {
         bottomLayerInstance.transform.scale(width / 2f, -height / 2f, 1f);
 
         topLayerInstance.transform.idt();
-        topLayerInstance.transform.translate(0f, 0f, 1f);
+        topLayerInstance.transform.translate(0f, 0f, 0.01f);
         topLayerInstance.transform.scale(width / 2f, -height / 2f, 1f);
 
     }
@@ -308,7 +317,7 @@ public class GameScreen implements Screen {
 
         update(delta);
         handleInput(delta);
-        cameraController.update(delta);
+//        cameraController.update(delta);
 
 
         //DirectionShadowLight (sun) position
