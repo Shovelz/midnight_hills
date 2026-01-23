@@ -1,0 +1,282 @@
+package io.midnight_hills;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.*;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import net.mgsx.gltf.loaders.gltf.GLTFLoader;
+import net.mgsx.gltf.scene3d.scene.Scene;
+import net.mgsx.gltf.scene3d.scene.SceneManager;
+
+public class GameScreen implements Screen {
+
+    private SpriteBatch batch;
+    private AssetManager assetManager;
+    private Main game;
+
+    private OrthographicCamera camera;
+    private FitViewport port, screenSpacePort;
+
+    int TILE_SIZE = 16; // pixels per tile
+    int VIEWPORT_WIDTH = 256;  // in pixels
+    int VIEWPORT_HEIGHT = 144; // in pixels
+
+
+    private OrthographicCamera screenCamera;
+    private float time = 0f;
+    private PerspectiveCamera persCamera;
+    private Environment environment;
+    private FreeLookCameraController cameraController;
+
+    private DirectionalShadowLight sun;
+    private float lightTime = 0f;
+    private Scene mapScene;
+    private Model mapModel;
+    private ModelBatch modelBatch, shadowBatch;
+    private ModelInstance arrowInstance;
+
+
+    public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
+        this.batch = batch;
+        this.assetManager = assetManager;
+        this.game = game;
+        this.camera = new OrthographicCamera();
+
+        screenCamera = new OrthographicCamera();
+        screenCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        screenCamera = new OrthographicCamera();
+        screenSpacePort = new FitViewport(1920, 1080, screenCamera);
+        screenSpacePort.apply();
+
+        screenCamera.update();
+        port = new FitViewport(256, 144, camera);
+        camera.update();
+
+        persCamera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        persCamera.position.set(0f, 0f, 12f);
+        persCamera.direction.set(0, 0, -1f);
+        persCamera.near = 0.1f;
+        persCamera.far = 50f;
+        persCamera.update();
+
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
+        sun = new DirectionalShadowLight(4096, 4096, 200f, 200f, 1f, 150f);
+        sun.set(2f, 2f, 2f, -1f, -1f, -1f);
+
+        environment.shadowMap = sun;
+        environment.add(sun);
+
+        String vertexSource = Gdx.files.internal("shaders/my.vertex.glsl").readString();
+        String fragmentSource = Gdx.files.internal("shaders/my.fragment.glsl").readString();
+
+        DefaultShader.Config config = new DefaultShader.Config(vertexSource, fragmentSource);
+
+        modelBatch = new ModelBatch(new DefaultShaderProvider(config));
+        shadowBatch = new ModelBatch(new DepthShaderProvider());
+
+
+        GLTFLoader gltfLoader = new GLTFLoader();
+        mapModel = gltfLoader.load(Gdx.files.internal("map/map_export.gltf")).scene.model;
+
+
+        mapScene = new Scene(mapModel);
+        for (Material m : mapScene.modelInstance.materials) {
+            m.set(IntAttribute.createCullFace(GL20.GL_NONE));
+            m.remove(BlendingAttribute.Type);
+            m.remove(FloatAttribute.AlphaTest);
+            m.set(new BlendingAttribute(
+                GL20.GL_SRC_ALPHA,
+                GL20.GL_ONE_MINUS_SRC_ALPHA
+            ));
+            m.set(FloatAttribute.createAlphaTest(0.5f));
+        }
+
+
+// Optional transforms
+        mapScene.modelInstance.transform.idt();
+        mapScene.modelInstance.transform.rotate(Vector3.Z, -45f); // if Blender Z-up
+//        mapScene.modelInstance.transform.rotate(Vector3.Y, 270f); // if Blender Z-up
+        mapScene.modelInstance.transform.scale(1f, 1f, 1f);
+
+        ModelBuilder mb = new ModelBuilder();
+
+        mb.begin();
+
+        Material shaftMat = new Material(ColorAttribute.createDiffuse(Color.YELLOW));
+        Material headMat = new Material(ColorAttribute.createDiffuse(Color.ORANGE));
+
+        long attrs = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal;
+
+// Shaft
+        mb.part(
+            "shaft",
+            GL20.GL_TRIANGLES,
+            attrs,
+            shaftMat
+        ).cylinder(
+            0.05f,   // diameter X
+            1.0f,    // height
+            0.05f,   // diameter Z
+            8
+        );
+
+// Head
+        mb.part(
+            "head",
+            GL20.GL_TRIANGLES,
+            attrs,
+            headMat
+        ).cone(
+            0.15f,   // diameter
+            0.3f,    // height
+            0.15f,   // diameter
+            8
+        );
+
+        Model arrowModel = mb.end();
+        arrowInstance = new ModelInstance(arrowModel);
+
+        cameraController = new FreeLookCameraController(persCamera);
+        Gdx.input.setCursorCatched(true);
+
+    }
+
+
+    private void update(float delta) {
+        float lerp = 5f * delta;
+        camera.position.x = 0;
+        camera.position.y = 0;
+
+        camera.update();
+        screenCamera.update();
+        persCamera.update();
+
+    }
+
+    private void handleInput(float delta) {
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            camera.zoom += 0.2f;
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+            camera.zoom -= 0.2f;
+        }
+        camera.update();
+
+    }
+
+    public OrthographicCamera getCamera() {
+        return camera;
+    }
+
+    private void updateLightArrow(ModelInstance arrow, DirectionalLight sun) {
+        Vector3 lightDir = new Vector3(sun.direction).nor();
+
+        // Light travels *toward* the scene
+        Vector3 arrowDir = new Vector3(lightDir).scl(-1f);
+
+        Vector3 arrowPos = new Vector3(camera.position)
+            .add(new Vector3(arrowDir).scl(2f));
+
+        Quaternion rot = new Quaternion().setFromCross(Vector3.Y, arrowDir);
+
+        arrow.transform.idt();
+        arrow.transform.translate(arrowPos);
+        arrow.transform.rotate(rot);
+    }
+
+    @Override
+    public void render(float delta) {
+
+        time += delta;
+
+        //Idk if these change anything, open gl is confusing lol
+        Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+        Gdx.gl.glDepthFunc(GL20.GL_LEQUAL);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        update(delta);
+        handleInput(delta);
+        cameraController.update(delta);
+
+
+        lightTime += delta;
+        float angle = lightTime * 5f; // adjust speed here
+        float elevation = 0.5f;
+
+        Vector3 sunDir = new Vector3(1f, elevation, 0f);
+
+        sunDir.rotate(Vector3.Y, angle).nor();
+        sun.setDirection(sunDir);
+
+        updateLightArrow(arrowInstance, sun);
+
+        //3d render to quad
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+        sun.begin(Vector3.Zero, sun.direction);
+        shadowBatch.begin(sun.getCamera());
+        shadowBatch.render(mapScene.modelInstance);
+        shadowBatch.end();
+        sun.end();
+
+
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+
+        modelBatch.begin(persCamera);
+        modelBatch.render(mapScene.modelInstance, environment);
+        modelBatch.render(arrowInstance);
+        modelBatch.end();
+
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        if (width <= 0 || height <= 0) return;
+        port.update(width, height, true);
+
+        screenSpacePort.update(width, height, true);
+    }
+
+    @Override
+    public void show() {
+        // Prepare your screen here.
+    }
+
+    @Override
+    public void pause() {
+        // Invoked when your application is paused.
+    }
+
+    @Override
+    public void resume() {
+        // Invoked when your application is resumed after pause.
+    }
+
+    @Override
+    public void hide() {
+        // This method is called when another screen replaces this one.
+    }
+
+    @Override
+    public void dispose() {
+        // Destroy screen's assets here.
+    }
+}
+

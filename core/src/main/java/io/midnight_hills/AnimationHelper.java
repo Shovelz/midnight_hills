@@ -2,11 +2,14 @@ package io.midnight_hills;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 
 public class AnimationHelper {
-    public static Animation<TextureRegion> loadAnimation(int width, int height, Texture sheet, float speed) {
+    public static Animation<TextureRegion> loadAnimation(int width, int height, Array<TextureAtlas.AtlasRegion> atlas, float speed) {
 
+        Texture sheet = atlas.get(0).getTexture();
         TextureRegion[][] tmpFrames = TextureRegion.split(sheet, width, height);
 
         TextureRegion[] animationFrames = new TextureRegion[tmpFrames.length * tmpFrames[0].length];
@@ -19,6 +22,4 @@ public class AnimationHelper {
         }
         return new Animation<TextureRegion>(speed, animationFrames);
     }
-
-
 }
