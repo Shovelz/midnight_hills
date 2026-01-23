@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -25,8 +26,13 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
+import io.midnight_hills.map.rooms.Room;
+import io.midnight_hills.map.rooms.RoomFactory;
+import io.midnight_hills.map.rooms.RoomManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 
 public class GameScreen implements Screen {
@@ -68,8 +74,11 @@ public class GameScreen implements Screen {
     private TextureAttribute bottomLayerAttr, topLayerAttr;
     private DirectionalShadowLight sun;
     private float lightTime = 0f;
-    private Model debugBallModel;
     private final Matrix4 originalTopTransform = new Matrix4();
+
+    private RoomManager roomManager;
+    private RoomFactory roomFactory;
+    private ArrayList<MapObject> doors;
 
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
@@ -198,11 +207,21 @@ public class GameScreen implements Screen {
         bottomLayerAttr = new TextureAttribute(1, frameRegion);
 
         Pixmap pixmap = new Pixmap(Gdx.files.internal("assets/ui/cursor.png"));
-// Set hotspot to the middle of it (0,0 would be the top-left corner)
         int xHotspot = 31, yHotspot = 31;
         Cursor cursor = Gdx.graphics.newCursor(pixmap, xHotspot, yHotspot);
-        pixmap.dispose(); // We don't need the pixmap anymore
+        pixmap.dispose();
         Gdx.graphics.setCursor(cursor);
+
+        roomManager = new RoomManager();
+        roomFactory = new RoomFactory(assetManager);
+
+        doors = new ArrayList<>();
+
+        for (MapObject door : map.getLayers().get("RoomEntry").getObjects()) {
+            MapProperties props = door.getProperties();
+            roomManager.add(props.get("room", String.class), roomFactory.create(props));
+            doors.add(door);
+        }
 
     }
 
@@ -246,6 +265,14 @@ public class GameScreen implements Screen {
         player.update(delta);
 
         persCamera.update();
+
+        for (MapObject door : doors) {
+            if (((RectangleMapObject) door).getRectangle().overlaps(player.getHitbox())) {
+                Room room = roomManager.get(door.getProperties().get("room", String.class));
+                map = room.getMap();
+                player.teleport(room.getEntry());
+            }
+        }
 
     }
 

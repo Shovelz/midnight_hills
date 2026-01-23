@@ -6,6 +6,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import org.lwjgl.opengl.NVTextureEnvCombine4;
 
 import java.util.ArrayList;
 
@@ -14,6 +15,7 @@ public class Player {
     private Animation<TextureRegion> currentAnimation, idleAnimation,
         walkDownAnimation, walkUpAnimation, walkLeftAnimation, walkRightAnimation,
         idleUpAnimation, idleDownAnimation, idleLeftAnimation, idleRightAnimation;
+
 
     public enum Direction {LEFT, RIGHT, UP, DOWN}
 
@@ -183,6 +185,11 @@ public class Player {
         return sprite;
     }
 
+    public void teleport(Vector2 entry) {
+        hitbox.x = entry.x;
+        hitbox.y = entry.y;
+        velocity = Vector2.Zero;
+    }
     public void render(SpriteBatch batch, float delta) {
 
 //        TextureRegion frame = currentAnimation.getKeyFrame(time, loopAnimation);

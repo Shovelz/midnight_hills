@@ -117,7 +117,7 @@
   <object id="24" x="144" y="205" width="16" height="13">
    <properties>
     <property name="facing" type="int" value="0"/>
-    <property name="room" value="house1"/>
+    <property name="room" value="House1"/>
     <property name="x" type="int" value="40"/>
     <property name="y" type="int" value="40"/>
    </properties>
