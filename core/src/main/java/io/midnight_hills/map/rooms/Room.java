@@ -2,42 +2,48 @@ package io.midnight_hills.map.rooms;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import io.midnight_hills.Player;
 import java.util.ArrayList;
 
 public abstract class Room {
 
-    protected Vector2 entry;
     protected String name;
-    protected Player.Direction entryDirection;
     protected ArrayList<Rectangle> colliders;
     protected TiledMap map;
+    protected ArrayList<Door> doors;
 
-    public Room(Vector2 entry, String name, Player.Direction entryDirection, TiledMap map){
-        this.entry = entry;
+    public Room(String name, TiledMap map, ArrayList<Door> doors, ArrayList<Rectangle> colliders){
         this.name = name;
-        this.entryDirection = entryDirection;
         this.map = map;
+        this.doors = doors;
+        this.colliders = colliders;
     }
 
     public ArrayList<Rectangle> getColliders(){
         return colliders;
     }
 
-    public Player.Direction getEntryDirection() {
-        return entryDirection;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public Vector2 getEntry() {
-        return entry;
     }
 
     public TiledMap getMap() {
         return map;
     }
+
+    public void addDoor(Door door){
+        doors.add(door);
+    }
+
+    public ArrayList<Door> getDoors(){
+        return doors;
+    }
+
+    public void onExit() {
+    }
+
+    public void onEnter() {
+
+    }
+
+    public abstract void update(float delta);
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g3d.*;
@@ -26,9 +27,11 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
+import io.midnight_hills.map.rooms.Door;
 import io.midnight_hills.map.rooms.Room;
 import io.midnight_hills.map.rooms.RoomFactory;
 import io.midnight_hills.map.rooms.RoomManager;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,15 +48,12 @@ public class GameScreen implements Screen {
     private FitViewport port, screenSpacePort;
 
     private Player player;
-    private TiledMap map;
-    private OrthogonalTiledMapRendererWithSprites mapRenderer;
-    int TILE_SIZE = 16; // pixels per tile
+    public final int TILE_SIZE = 16; // pixels per tile
     int VIEWPORT_WIDTH = 256;  // in pixels
     int VIEWPORT_HEIGHT = 144; // in pixels
     private ArrayList<Rectangle> collisionRects = new ArrayList<>();
 
     private MapLayer foregroundLayers, backgroundLayers, middleLayers, treeLayer;
-    private int mapWidthInPixels, mapHeightInPixels;
     private ShaderProgram shaderProgram;
     private Texture noiseTexture;
 
@@ -78,7 +78,6 @@ public class GameScreen implements Screen {
 
     private RoomManager roomManager;
     private RoomFactory roomFactory;
-    private ArrayList<MapObject> doors;
 
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
@@ -103,31 +102,13 @@ public class GameScreen implements Screen {
         persCamera.near = 0.1f;
         persCamera.far = 50f;
         persCamera.update();
+//
+//        backgroundLayers = map.getLayers().get("Background");
+//        middleLayers = map.getLayers().get("Foreground");
+//        foregroundLayers = map.getLayers().get("OverlapPlayer");
+//        treeLayer = map.getLayers().get("Trees");
 
-        map = new TmxMapLoader().load("map/map.tmx");
-        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch); // reuse your SpriteBatch
-
-
-        backgroundLayers = map.getLayers().get("Background");
-        middleLayers = map.getLayers().get("Foreground");
-        foregroundLayers = map.getLayers().get("OverlapPlayer");
-        treeLayer = map.getLayers().get("Trees");
-
-        // Grab collisions
-        for (MapObject object : map.getLayers().get("Collisions").getObjects()) {
-            if (object instanceof RectangleMapObject) {
-                Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                collisionRects.add(rect);
-            }
-        }
-
-        int mapWidthInTiles = map.getProperties().get("width", Integer.class);
-        int mapHeightInTiles = map.getProperties().get("height", Integer.class);
-        mapWidthInPixels = mapWidthInTiles * TILE_SIZE;
-        mapHeightInPixels = mapHeightInTiles * TILE_SIZE;
-
-        player = new Player(assetManager, collisionRects, this, new Vector2(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f));
-        mapRenderer.addSprite(player.getSprite());
+        player = new Player(assetManager, camera, new Vector2(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f));
 
         String vert = Gdx.files.internal("shaders/test.vertex.glsl").readString();
         String frag = Gdx.files.internal("shaders/test.fragment.glsl").readString();
@@ -187,7 +168,6 @@ public class GameScreen implements Screen {
         bottomLayerInstance.transform.translate(0f, 0f, 0f);
 
 
-        fitQuadToCamera();
 
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
@@ -212,17 +192,22 @@ public class GameScreen implements Screen {
         pixmap.dispose();
         Gdx.graphics.setCursor(cursor);
 
-        roomManager = new RoomManager();
+        roomManager = new RoomManager(player, batch);
         roomFactory = new RoomFactory(assetManager);
 
-        doors = new ArrayList<>();
+        FileHandle dir = Gdx.files.internal("assets/map/rooms");
+        FileHandle[] files = dir.list();
 
-        for (MapObject door : map.getLayers().get("RoomEntry").getObjects()) {
-            MapProperties props = door.getProperties();
-            roomManager.add(props.get("room", String.class), roomFactory.create(props));
-            doors.add(door);
+        for (FileHandle file : files) {
+            System.out.println(file.name());        // farm.tmx
+            System.out.println(file.nameWithoutExtension()); // farm
+            System.out.println(file.path());        // maps/farm.tmx
+            roomManager.add(file.nameWithoutExtension(), roomFactory.create(file.nameWithoutExtension()));
         }
 
+        roomManager.init();
+
+        fitQuadToCamera();
     }
 
 
@@ -254,6 +239,9 @@ public class GameScreen implements Screen {
         float halfViewportWidth = port.getWorldWidth() / 2f;
         float halfViewportHeight = port.getWorldHeight() / 2f;
 
+        int mapWidthInPixels = roomManager.getCurrentRoom().getMap().getProperties().get("width", Integer.class) * TILE_SIZE;
+        int mapHeightInPixels = roomManager.getCurrentRoom().getMap().getProperties().get("width", Integer.class) * TILE_SIZE;
+
         camera.position.x = Math.max(halfViewportWidth, camera.position.x);
         camera.position.x = Math.min(mapWidthInPixels - halfViewportWidth, camera.position.x);
 
@@ -262,17 +250,10 @@ public class GameScreen implements Screen {
 
         camera.update();
         screenCamera.update();
+        persCamera.update();
         player.update(delta);
 
-        persCamera.update();
-
-        for (MapObject door : doors) {
-            if (((RectangleMapObject) door).getRectangle().overlaps(player.getHitbox())) {
-                Room room = roomManager.get(door.getProperties().get("room", String.class));
-                map = room.getMap();
-                player.teleport(room.getEntry());
-            }
-        }
+        roomManager.update(delta);
 
     }
 
@@ -322,8 +303,8 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(1, 0, 0, 1, true);
         batch.setShader(null);
 
-        mapRenderer.setView(camera);
-        mapRenderer.render();
+        //Render the world
+        roomManager.render(batch, delta, camera);
 
 
         frameBuffer.end();
@@ -342,6 +323,7 @@ public class GameScreen implements Screen {
         bottomLayerAttr.textureDescription.set(frameRegion.getTexture(), Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         bottomLayerInstance.materials.get(0).set(bottomLayerAttr);
 
+        //Render in 3d space for lighting
         modelBatch.begin(persCamera);
         modelBatch.render(bottomLayerInstance, environment);
         modelBatch.end();

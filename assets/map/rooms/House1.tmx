@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="1">
- <tileset firstgid="1" source="tilset.tsx"/>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="2">
+ <tileset firstgid="1" source="../room_tilesets/tilset.tsx"/>
  <layer id="1" name="Background" width="30" height="20">
   <data encoding="csv">
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -49,5 +49,15 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="4" name="Doors">
+  <object id="1" x="80" y="192" width="16" height="6">
+   <properties>
+    <property name="facing" type="int" value="3"/>
+    <property name="room" value="Town"/>
+    <property name="x" type="int" value="144"/>
+    <property name="y" type="int" value="80"/>
+   </properties>
+  </object>
+ </objectgroup>
  <objectgroup id="2" name="Collisions"/>
 </map>

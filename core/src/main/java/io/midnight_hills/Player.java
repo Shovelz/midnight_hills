@@ -3,11 +3,13 @@ package io.midnight_hills;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import org.lwjgl.opengl.NVTextureEnvCombine4;
 
+import javax.xml.validation.ValidatorHandler;
 import java.util.ArrayList;
 
 public class Player {
@@ -26,7 +28,7 @@ public class Player {
     private State state;
     private Vector2 velocity = new Vector2();
     private ArrayList<Rectangle> collisionRects;
-    private GameScreen gameScreen;
+    private OrthographicCamera camera;
 
     private float time = 0f;
     private boolean loopAnimation = true;
@@ -36,9 +38,9 @@ public class Player {
     private Rectangle hitbox = new Rectangle(100, 100, 14, 8);
     private Sprite sprite;
 
-    public Player(AssetManager assetManager, ArrayList<Rectangle> collisionRects, GameScreen gameScreen, Vector2 startPosition) {
-        this.collisionRects = new ArrayList<>(collisionRects);
-        this.gameScreen = gameScreen;
+    public Player(AssetManager assetManager, OrthographicCamera camera, Vector2 startPosition) {
+        this.collisionRects = new ArrayList<>();
+        this.camera = camera;
 
         assetManager.load("packed/player.atlas", TextureAtlas.class);
         assetManager.finishLoading();
@@ -57,10 +59,14 @@ public class Player {
         currentAnimation = walkUpAnimation;
         direction = Direction.DOWN;
 
-        hitbox.x = gameScreen.getCamera().position.x;
-        hitbox.y = gameScreen.getCamera().position.y;
+        hitbox.x = camera.position.x;
+        hitbox.y = camera.position.y;
         sprite = new Sprite();
 
+    }
+
+    public void setCollisionRects(ArrayList<Rectangle> collisionRects){
+        this.collisionRects = collisionRects;
     }
 
     public void handleInput(float delta) {
@@ -192,12 +198,5 @@ public class Player {
     }
     public void render(SpriteBatch batch, float delta) {
 
-//        TextureRegion frame = currentAnimation.getKeyFrame(time, loopAnimation);
-//        if (direction == Direction.LEFT && !frame.isFlipX()) {
-//            frame.flip(true, false);
-//        } else if (direction == Direction.RIGHT && frame.isFlipX()) {
-//            frame.flip(true, false);
-//        }
-//        sprite.draw(batch);
     }
 }
