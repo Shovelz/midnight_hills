@@ -240,7 +240,7 @@ public class GameScreen implements Screen {
         float halfViewportHeight = port.getWorldHeight() / 2f;
 
         int mapWidthInPixels = roomManager.getCurrentRoom().getMap().getProperties().get("width", Integer.class) * TILE_SIZE;
-        int mapHeightInPixels = roomManager.getCurrentRoom().getMap().getProperties().get("width", Integer.class) * TILE_SIZE;
+        int mapHeightInPixels = roomManager.getCurrentRoom().getMap().getProperties().get("height", Integer.class) * TILE_SIZE;
 
         camera.position.x = Math.max(halfViewportWidth, camera.position.x);
         camera.position.x = Math.min(mapWidthInPixels - halfViewportWidth, camera.position.x);
@@ -300,7 +300,7 @@ public class GameScreen implements Screen {
         //Frame buffer with player and tiles on it
         frameBuffer.begin();
 
-        ScreenUtils.clear(1, 0, 0, 1, true);
+        ScreenUtils.clear(0, 0, 0, 1, true);
         batch.setShader(null);
 
         //Render the world
@@ -327,6 +327,11 @@ public class GameScreen implements Screen {
         modelBatch.begin(persCamera);
         modelBatch.render(bottomLayerInstance, environment);
         modelBatch.end();
+
+        Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        roomManager.renderFade(screenCamera);
     }
 
     @Override

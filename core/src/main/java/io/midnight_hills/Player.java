@@ -18,6 +18,14 @@ public class Player {
         walkDownAnimation, walkUpAnimation, walkLeftAnimation, walkRightAnimation,
         idleUpAnimation, idleDownAnimation, idleLeftAnimation, idleRightAnimation;
 
+    public void lockInput() {
+    }
+
+    public void unlockInput() {
+
+    }
+
+
 
     public enum Direction {LEFT, RIGHT, UP, DOWN}
 
