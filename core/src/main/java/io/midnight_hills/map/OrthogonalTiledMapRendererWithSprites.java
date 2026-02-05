@@ -12,19 +12,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRenderer {
-    private Sprite sprite;
     private List<Sprite> sprites;
-    private int drawSpritesAfterLayer = 2;
+    private List<Sprite> overlaps;
+    private List<Sprite> shadows;
+    private final int drawSpritesAfterLayer = 3;
+    private final int drawShadowAfterLayer = 2;
+    private final int drawOverlapAfterLayer = 4;
 
     public OrthogonalTiledMapRendererWithSprites(TiledMap map, SpriteBatch batch) {
         super(map, batch);
-        sprites = new ArrayList<Sprite>();
+        sprites = new ArrayList<>();
+        shadows = new ArrayList<>();
+        overlaps = new ArrayList<>();
     }
 
     public void addSprite(Sprite sprite){
         sprites.add(sprite);
     }
 
+    public void addShadow(Sprite sprite){
+        shadows.add(sprite);
+    }
+
+    public void addOverlap(Sprite sprite){
+        overlaps.add(sprite);
+    }
     @Override
     public void render() {
         beginRender();
@@ -36,7 +48,18 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
                     currentLayer++;
                     if(currentLayer == drawSpritesAfterLayer){
                         for(Sprite sprite : sprites)
-                            sprite.draw(batch);
+                            if(sprite.getTexture() != null)
+                                sprite.draw(batch);
+                    }
+                    if(currentLayer == drawShadowAfterLayer){
+                        for(Sprite shadow: shadows)
+                            if(shadow.getTexture() != null)
+                                shadow.draw(batch);
+                    }
+                    if(currentLayer == drawOverlapAfterLayer){
+                        for(Sprite overlap : overlaps)
+                            if(overlap.getTexture() != null)
+                                overlap.draw(batch);
                     }
                 } else {
                     for (MapObject object : layer.getObjects()) {

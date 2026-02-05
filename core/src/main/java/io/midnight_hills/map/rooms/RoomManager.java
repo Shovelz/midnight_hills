@@ -1,14 +1,22 @@
 package io.midnight_hills.map.rooms;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 import io.midnight_hills.Player;
 import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
+import io.midnight_hills.npc.NPC;
+import org.lwjgl.Sys;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RoomManager {
@@ -44,11 +52,7 @@ public class RoomManager {
         System.out.println(rooms);
         currentRoom = rooms.get("Town");
         player.teleport(new Vector2(100, 100));
-        player.setCollisionRects(currentRoom.getColliders());
-
-        map = currentRoom.getMap();
-        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
-        mapRenderer.addSprite(player.getSprite());
+        setupRoom(currentRoom);
     }
 
     public void add(String id, Room room) {
@@ -61,10 +65,10 @@ public class RoomManager {
 
     public void update(float delta) {
 
+        currentRoom.update(delta);
         if (transitionState != TransitionState.NONE) {
-            updateTransition(delta);
             player.lockInput();
-            player.unlockInput();
+            updateTransition(delta);
             return;
         }
         for (Door door : currentRoom.getDoors()) {
@@ -90,6 +94,7 @@ public class RoomManager {
             case FADE_IN:
                 if (transitionTime >= transitionDuration) {
                     transitionState = TransitionState.NONE;
+                    player.unlockInput();
                 }
                 break;
         }
@@ -141,6 +146,24 @@ public class RoomManager {
         return 0f;
     }
 
+    private void setupRoom(Room room) {
+        ArrayList<Rectangle> collisionRects = new ArrayList<>(room.getColliders());
+        for (NPC npc : room.getNpcs()) {
+            collisionRects.add(npc.getHitbox());
+        }
+        player.setCollisionRects(collisionRects);
+
+        map = room.getMap();
+        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
+        mapRenderer.addSprite(player.getSprite());
+        mapRenderer.addShadow(player.getShadow());
+
+        for (NPC npc : room.getNpcs()) {
+            npc.registerSprites(mapRenderer);
+        }
+        System.out.println("Created in render loop");
+    }
+
 
     private void switchRoom() {
         if (currentRoom != null) {
@@ -150,11 +173,7 @@ public class RoomManager {
         currentRoom = rooms.get(pendingDoor.getDestination());
 
         player.teleport(pendingDoor.getEntryLocation());
-        player.setCollisionRects(currentRoom.getColliders());
-
-        map = currentRoom.getMap();
-        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
-        mapRenderer.addSprite(player.getSprite());
+        setupRoom(currentRoom);
 
         currentRoom.onEnter();
     }

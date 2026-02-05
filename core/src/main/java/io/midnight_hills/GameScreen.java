@@ -17,25 +17,17 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.MapProperties;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
-import io.midnight_hills.map.rooms.Door;
-import io.midnight_hills.map.rooms.Room;
 import io.midnight_hills.map.rooms.RoomFactory;
 import io.midnight_hills.map.rooms.RoomManager;
-import org.lwjgl.Sys;
+import io.midnight_hills.npc.NPC;
+import io.midnight_hills.npc.NPCFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 
 
 public class GameScreen implements Screen {
@@ -78,9 +70,13 @@ public class GameScreen implements Screen {
 
     private RoomManager roomManager;
     private RoomFactory roomFactory;
+    private NPCFactory npcFactory;
+    private Vector3 mousePosition;
+    private TiledMapTile hoveredTile;
 
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
+
         this.batch = batch;
         this.assetManager = assetManager;
         this.game = game;
@@ -121,7 +117,7 @@ public class GameScreen implements Screen {
 
         if (shaderProgram.isCompiled()) {
             System.out.println("Compiled Successfully");
-//            batch.setShader(shaderProgram);
+            batch.setShader(shaderProgram);
         } else {
             throw new GdxRuntimeException(shaderProgram.getLog());
         }
@@ -168,7 +164,6 @@ public class GameScreen implements Screen {
         bottomLayerInstance.transform.translate(0f, 0f, 0f);
 
 
-
         environment = new Environment();
         environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
         sun = new DirectionalShadowLight(4096, 4096, 200f, 200f, 1f, 150f);
@@ -193,21 +188,21 @@ public class GameScreen implements Screen {
         Gdx.graphics.setCursor(cursor);
 
         roomManager = new RoomManager(player, batch);
-        roomFactory = new RoomFactory(assetManager);
+        npcFactory = new NPCFactory(assetManager);
+        roomFactory = new RoomFactory(assetManager, npcFactory);
 
         FileHandle dir = Gdx.files.internal("assets/map/rooms");
         FileHandle[] files = dir.list();
 
         for (FileHandle file : files) {
-            System.out.println(file.name());        // farm.tmx
-            System.out.println(file.nameWithoutExtension()); // farm
-            System.out.println(file.path());        // maps/farm.tmx
             roomManager.add(file.nameWithoutExtension(), roomFactory.create(file.nameWithoutExtension()));
         }
 
         roomManager.init();
 
         fitQuadToCamera();
+        font = new BitmapFont();
+        font.setColor(Color.WHITE);
     }
 
 
@@ -231,9 +226,16 @@ public class GameScreen implements Screen {
 
 
     private void update(float delta) {
-        float lerp = 5f * delta;
-        camera.position.x += (player.getHitbox().x + player.getHitbox().width / 2f - camera.position.x) * lerp;
-        camera.position.y += (player.getHitbox().y + player.getHitbox().height / 2f - camera.position.y) * lerp;
+
+        float cameraDelta = Math.min(delta, 1f / 60f);
+        float smoothness = 5f;
+        float alpha = 1f - (float) Math.exp(-smoothness * cameraDelta);
+//        float lerp = 5f * delta;
+        float targetX = player.getHitbox().x + player.getHitbox().width / 2f;
+        float targetY = player.getHitbox().y + player.getHitbox().height / 2f;
+
+        camera.position.x += (targetX - camera.position.x) * alpha;
+        camera.position.y += (targetY - camera.position.y) * alpha;
 
         // Clamp camera to map bounds
         float halfViewportWidth = port.getWorldWidth() / 2f;
@@ -248,12 +250,13 @@ public class GameScreen implements Screen {
         camera.position.y = Math.max(halfViewportHeight, camera.position.y);
         camera.position.y = Math.min(mapHeightInPixels - halfViewportHeight, camera.position.y);
 
+        player.update(delta);
+        roomManager.update(delta);
+
         camera.update();
         screenCamera.update();
         persCamera.update();
-        player.update(delta);
 
-        roomManager.update(delta);
 
     }
 
@@ -265,9 +268,21 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.E)) {
             camera.zoom -= 0.2f;
         }
-        camera.update();
 
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            for (NPC npc : roomManager.getCurrentRoom().getNpcs()) {
+                if (npc.getHitbox().contains(getMousePosInGameWorld())) {
+                    npc.clicked(delta);
+                }
+            }
+        }
     }
+
+    public Vector2 getMousePosInGameWorld() {
+        Vector3 pos = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        return new Vector2(pos.x, pos.y);
+    }
+
 
     public OrthographicCamera getCamera() {
         return camera;
@@ -277,6 +292,11 @@ public class GameScreen implements Screen {
     public void render(float delta) {
 
         time += delta;
+
+
+        if (delta > 0.025f) {
+            System.out.println("DELTA SPIKE: " + delta);
+        }
 
         //Idk if these change anything, open gl is confusing lol
         Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
@@ -305,9 +325,9 @@ public class GameScreen implements Screen {
 
         //Render the world
         roomManager.render(batch, delta, camera);
-
-
         frameBuffer.end();
+
+
 
         //3d render to quad
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1f);
@@ -316,23 +336,26 @@ public class GameScreen implements Screen {
         Vector3 scale = new Vector3();
         originalTopTransform.getScale(scale);
 
-        // Normal scene pass
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-        //Set the instance textures to backgroundBuffer and foregroundBuffer
+        //Set the instance textures to buffer
         bottomLayerAttr.textureDescription.set(frameRegion.getTexture(), Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         bottomLayerInstance.materials.get(0).set(bottomLayerAttr);
+
 
         //Render in 3d space for lighting
         modelBatch.begin(persCamera);
         modelBatch.render(bottomLayerInstance, environment);
         modelBatch.end();
+        batch.begin();
+        batch.setProjectionMatrix(screenCamera.combined);
+        font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 1070);
+        batch.end();
 
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         roomManager.renderFade(screenCamera);
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -374,21 +397,3 @@ public class GameScreen implements Screen {
         // Destroy screen's assets here.
     }
 }
-//Shader for clouds, currently not in use
-//        batch.setShader(null);
-//        Gdx.gl.glUseProgram(0);
-/// /        batch.setShader(shaderProgram);
-//        batch.setProjectionMatrix(screenCamera.combined);
-//        batch.begin();
-
-//        fbRegion.getTexture().bind(0);
-//        shaderProgram.setUniformi("u_texture", 0);
-//        noiseTexture.bind(1);
-//        shaderProgram.setUniformi("u_noiseTexture", 1);
-//        shaderProgram.setUniformf("u_time", time);
-//        shaderProgram.setUniformf("u_resolution", screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
-
-//        batch.draw(fbRegion, 0, 0, screenSpacePort.getWorldWidth(), screenSpacePort.getWorldHeight());
-//
-//        batch.end();
-//        batch.setShader(null);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.2" name="tilset" tilewidth="16" tileheight="16" spacing="4" margin="2" tilecount="144" columns="16">
- <image source="tileset_image.png" width="320" height="180"/>
+<tileset version="1.10" tiledversion="1.11.2" name="tilset" tilewidth="16" tileheight="16" spacing="4" margin="2" tilecount="260" columns="20">
+ <image source="tileset_image.png" width="400" height="260"/>
  <tile id="1">
   <properties>
    <property name="id" type="int" value="1"/>
@@ -31,26 +31,6 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="17">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="18">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="19">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="20">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
  <tile id="21">
   <properties>
    <property name="id" type="int" value="1"/>
@@ -61,42 +41,22 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="33">
+ <tile id="23">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="34">
+ <tile id="24">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="35">
+ <tile id="25">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="36">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="37">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="38">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="39">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="40">
+ <tile id="26">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
@@ -111,72 +71,62 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="55">
+ <tile id="43">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="56">
+ <tile id="44">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="57">
+ <tile id="45">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="58">
+ <tile id="46">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="80">
+ <tile id="47">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="81">
+ <tile id="48">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="82">
+ <tile id="49">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="83">
+ <tile id="50">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="84">
+ <tile id="67">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="85">
+ <tile id="68">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="96">
+ <tile id="69">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="97">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="98">
-  <properties>
-   <property name="id" type="int" value="1"/>
-  </properties>
- </tile>
- <tile id="99">
+ <tile id="70">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
@@ -191,22 +141,72 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="116">
+ <tile id="102">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="117">
+ <tile id="103">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="132">
+ <tile id="104">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
- <tile id="133">
+ <tile id="105">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="120">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="121">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="122">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="123">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="124">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="125">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="144">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="145">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="164">
+  <properties>
+   <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="165">
   <properties>
    <property name="id" type="int" value="1"/>
   </properties>

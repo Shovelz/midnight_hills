@@ -6,224 +6,238 @@ filter: Nearest, Nearest
 repeat: none
 idleDown
   rotate: false
-  xy: 1, 1
+  xy: 1, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkDown
   rotate: false
-  xy: 1, 1
+  xy: 1, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 1
+idleDown
+  rotate: false
+  xy: 19, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 idleLeft
   rotate: false
-  xy: 19, 1
+  xy: 37, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
+walkLeft
+  rotate: false
+  xy: 37, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 2
+walkLeft
+  rotate: false
+  xy: 37, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 4
 idleRight
   rotate: false
-  xy: 37, 1
+  xy: 55, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
+walkRight
+  rotate: false
+  xy: 55, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 2
+walkRight
+  rotate: false
+  xy: 55, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 4
 idleUp
   rotate: false
-  xy: 55, 1
+  xy: 73, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkUp
   rotate: false
-  xy: 55, 1
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 6
-walkUp
-  rotate: false
-  xy: 55, 1
+  xy: 73, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
+walkUp
+  rotate: false
+  xy: 73, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 6
+playerShadow
+  rotate: false
+  xy: 1, 1
+  size: 12, 6
+  orig: 12, 6
+  offset: 0, 0
+  index: -1
 walkDown
   rotate: false
-  xy: 73, 1
+  xy: 91, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 2
 walkDown
   rotate: false
-  xy: 91, 1
+  xy: 109, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
 walkDown
   rotate: false
-  xy: 109, 1
+  xy: 127, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 4
 walkDown
   rotate: false
-  xy: 127, 1
+  xy: 145, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 5
 walkDown
   rotate: false
-  xy: 145, 1
+  xy: 163, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 6
 walkDown
   rotate: false
-  xy: 163, 1
+  xy: 181, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 7
 walkDown
   rotate: false
-  xy: 181, 1
+  xy: 199, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 8
 walkDown
   rotate: false
-  xy: 199, 1
+  xy: 217, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 9
 walkDown
   rotate: false
-  xy: 217, 1
+  xy: 235, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 10
 walkLeft
   rotate: false
-  xy: 235, 1
+  xy: 253, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 walkLeft
   rotate: false
-  xy: 253, 1
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 2
-walkLeft
-  rotate: false
-  xy: 253, 1
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 4
-walkLeft
-  rotate: false
-  xy: 271, 1
+  xy: 271, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
 walkRight
   rotate: false
-  xy: 289, 1
+  xy: 289, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 walkRight
   rotate: false
-  xy: 307, 1
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 2
-walkRight
-  rotate: false
-  xy: 307, 1
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 4
-walkRight
-  rotate: false
-  xy: 325, 1
+  xy: 307, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
 walkUp
   rotate: false
-  xy: 343, 1
+  xy: 325, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 2
 walkUp
   rotate: false
-  xy: 361, 1
+  xy: 343, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
 walkUp
   rotate: false
-  xy: 379, 1
+  xy: 361, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 4
 walkUp
   rotate: false
-  xy: 397, 1
+  xy: 379, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 5
 walkUp
   rotate: false
-  xy: 415, 1
+  xy: 397, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 7
 walkUp
   rotate: false
-  xy: 433, 1
+  xy: 415, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 8
 walkUp
   rotate: false
-  xy: 451, 1
+  xy: 433, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 9
 walkUp
   rotate: false
-  xy: 469, 1
+  xy: 451, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0

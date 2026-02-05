@@ -4,12 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import org.lwjgl.opengl.NVTextureEnvCombine4;
-
-import javax.xml.validation.ValidatorHandler;
 import java.util.ArrayList;
 
 public class Player {
@@ -17,15 +15,6 @@ public class Player {
     private Animation<TextureRegion> currentAnimation, idleAnimation,
         walkDownAnimation, walkUpAnimation, walkLeftAnimation, walkRightAnimation,
         idleUpAnimation, idleDownAnimation, idleLeftAnimation, idleRightAnimation;
-
-    public void lockInput() {
-    }
-
-    public void unlockInput() {
-
-    }
-
-
 
     public enum Direction {LEFT, RIGHT, UP, DOWN}
 
@@ -37,20 +26,23 @@ public class Player {
     private Vector2 velocity = new Vector2();
     private ArrayList<Rectangle> collisionRects;
     private OrthographicCamera camera;
+    private boolean movementLocked = false;
 
     private float time = 0f;
     private boolean loopAnimation = true;
-    private final float walkSpeed = 50f, runSpeed = 6f;
+    private final float walkSpeed = 40f, runSpeed = 6f;
     //    private final float walkSpeed = 25f, runSpeed = 6f;
     private float speed = walkSpeed;
     private Rectangle hitbox = new Rectangle(100, 100, 14, 8);
-    private Sprite sprite;
+    private Sprite sprite, shadow;
+    private Texture shadowTexture;
 
     public Player(AssetManager assetManager, OrthographicCamera camera, Vector2 startPosition) {
         this.collisionRects = new ArrayList<>();
         this.camera = camera;
 
         assetManager.load("packed/player.atlas", TextureAtlas.class);
+        assetManager.load("player/playerShadow.png", Texture.class);
         assetManager.finishLoading();
         TextureAtlas atlas = assetManager.get("packed/player.atlas");
 
@@ -60,7 +52,7 @@ public class Player {
         walkRightAnimation = new Animation<>(0.25f, atlas.findRegions("walkRight"), Animation.PlayMode.LOOP);
 
         idleUpAnimation = new Animation<>(0.25f, atlas.findRegions("idleUp"), Animation.PlayMode.LOOP);
-        idleDownAnimation = new Animation<>(0.25f, atlas.findRegions("idleDown"), Animation.PlayMode.LOOP);
+        idleDownAnimation = new Animation<>(0.5f, atlas.findRegions("idleDown"), Animation.PlayMode.LOOP);
         idleLeftAnimation = new Animation<>(0.25f, atlas.findRegions("idleLeft"), Animation.PlayMode.LOOP);
         idleRightAnimation = new Animation<>(0.25f, atlas.findRegions("idleRight"), Animation.PlayMode.LOOP);
 
@@ -70,6 +62,11 @@ public class Player {
         hitbox.x = camera.position.x;
         hitbox.y = camera.position.y;
         sprite = new Sprite();
+        shadow = new Sprite();
+        shadowTexture = assetManager.get("player/playerShadow.png", Texture.class);
+        shadow.setSize(12, 6);
+        shadow.setRegion(shadowTexture);
+        shadow.setOriginCenter();
 
     }
 
@@ -83,6 +80,10 @@ public class Player {
         velocity.y = 0;
         state = State.IDLE;
 
+        if(movementLocked){
+            velocity = Vector2.Zero;
+            return;
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             velocity.x = -1;
             direction = Direction.LEFT;
@@ -106,6 +107,16 @@ public class Player {
 
     }
 
+
+    public void lockInput() {
+        movementLocked = true;
+    }
+
+    public void unlockInput() {
+        movementLocked = false;
+    }
+
+
     public void update(float delta) {
         handleInput(delta);
         time += delta;
@@ -119,7 +130,6 @@ public class Player {
 
         for (Rectangle rect : collisionRects) {
             if (verticalBounds.overlaps(rect)) {
-                System.out.println("Vertical Overlap");
                 if (velocity.y > 0) {
                     newY = rect.y - hitbox.height;
                 } else if (velocity.y < 0) {
@@ -136,7 +146,6 @@ public class Player {
 
         for (Rectangle rect : collisionRects) {
             if (horizontalBounds.overlaps(rect)) {
-                System.out.println("Horizontal Overlap");
                 if (velocity.x > 0) {
                     newX = rect.x - hitbox.width;
                 } else if (velocity.x < 0) {
@@ -186,7 +195,9 @@ public class Player {
         sprite.setRegion(frame);
         sprite.setSize(16, 17);
         sprite.setOriginCenter();
-        sprite.setPosition(hitbox.x, hitbox.y);
+        sprite.setPosition(hitbox.x-1, hitbox.y);
+
+        shadow.setPosition(hitbox.x + (sprite.getWidth()- shadow.getWidth())/2f -1, hitbox.y - 2);
 
 
     }
@@ -197,6 +208,10 @@ public class Player {
 
     public Sprite getSprite() {
         return sprite;
+    }
+
+    public Sprite getShadow(){
+        return shadow;
     }
 
     public void teleport(Vector2 entry) {

@@ -9,6 +9,8 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import io.midnight_hills.Player;
+import io.midnight_hills.npc.NPC;
+import io.midnight_hills.npc.NPCFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +22,11 @@ public class RoomFactory {
 
     private final AssetManager assetManager;
     private final Map<String, Function<RoomContext, Room>> registry = new HashMap<>();
+    private NPCFactory npcFactory;
 
-    public RoomFactory(AssetManager assetManager) {
+    public RoomFactory(AssetManager assetManager, NPCFactory npcFactory) {
         this.assetManager = assetManager;
+        this.npcFactory = npcFactory;
 
         register("House1", House1::new);
         register("Town", Town::new);
@@ -55,13 +59,18 @@ public class RoomFactory {
             colliders.add(rect);
         }
 
+        ArrayList<NPC> npcs = new ArrayList<>();
+        for (MapObject npc : map.getLayers().get("Npcs").getObjects()) {
+            npcs.add(npcFactory.create(npc, map));
+        }
+
         Function<RoomContext, Room> ctor = registry.get(roomId);
         if (ctor == null) {
             throw new RuntimeException("Unknown room id: " + roomId);
         }
 
         RoomContext ctx = new RoomContext(
-            roomId, map, doors, colliders
+            roomId, map, doors, colliders, npcs
         );
 
         return ctor.apply(ctx);
