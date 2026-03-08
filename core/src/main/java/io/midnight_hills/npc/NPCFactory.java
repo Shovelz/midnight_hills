@@ -5,13 +5,8 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import io.midnight_hills.Player;
-import io.midnight_hills.map.rooms.*;
-import org.lwjgl.Sys;
-import org.lwjgl.opengl.APPLERowBytes;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,6 +20,7 @@ public class NPCFactory {
         this.assetManager = assetManager;
 
         register("Rock", Rock::new);
+        register("SpiderLady", SpiderLady::new);
     }
 
     private void register(String id, Function<NPCContext, NPC> constructor) {

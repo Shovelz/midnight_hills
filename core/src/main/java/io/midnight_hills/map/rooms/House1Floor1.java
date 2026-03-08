@@ -1,0 +1,13 @@
+package io.midnight_hills.map.rooms;
+
+public class House1Floor1 extends Room {
+
+    public House1Floor1(RoomContext ctx) {
+        super(ctx.name, ctx.map, ctx.doors, ctx.colliders, ctx.npcs);
+    }
+
+    @Override
+    public void update(float delta) {
+
+    }
+}

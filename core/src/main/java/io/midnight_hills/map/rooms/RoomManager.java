@@ -1,20 +1,15 @@
 package io.midnight_hills.map.rooms;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.TimeUtils;
-import io.midnight_hills.Player;
+import io.midnight_hills.player.Player;
 import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
 import io.midnight_hills.npc.NPC;
-import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,6 +152,7 @@ public class RoomManager {
         mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
         mapRenderer.addSprite(player.getSprite());
         mapRenderer.addShadow(player.getShadow());
+//        mapRenderer.addRayHandler();
 
         for (NPC npc : room.getNpcs()) {
             npc.registerSprites(mapRenderer);
@@ -173,6 +169,7 @@ public class RoomManager {
         currentRoom = rooms.get(pendingDoor.getDestination());
 
         player.teleport(pendingDoor.getEntryLocation());
+        player.faceDirection(pendingDoor.getEntryDirection());
         setupRoom(currentRoom);
 
         currentRoom.onEnter();

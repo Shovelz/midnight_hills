@@ -2,7 +2,7 @@ package io.midnight_hills.map.rooms;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import io.midnight_hills.Player;
+import io.midnight_hills.player.Player;
 
 public class Door {
 

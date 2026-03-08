@@ -8,9 +8,10 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import io.midnight_hills.Player;
+import io.midnight_hills.player.Player;
 import io.midnight_hills.npc.NPC;
 import io.midnight_hills.npc.NPCFactory;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ public class RoomFactory {
         this.npcFactory = npcFactory;
 
         register("House1", House1::new);
+        register("House1_floor1", House1Floor1::new);
         register("Town", Town::new);
     }
 
@@ -44,7 +46,12 @@ public class RoomFactory {
         for (MapObject object : map.getLayers().get("Doors").getObjects()) {
             MapProperties props = object.getProperties();
 
-            Player.Direction direction = Arrays.stream(Player.Direction.values()).toList().get(props.get("facing", Integer.class));
+            int direction_integer = props.get("facing", Integer.class);
+            if(direction_integer < 0 || direction_integer > 3){
+                direction_integer = 0;
+            }
+            Player.Direction direction = Arrays.stream(Player.Direction.values()).toList().get(direction_integer);
+            System.out.println("Door direction: " + direction);
             Vector2 entry = new Vector2(props.get("x", Integer.class), props.get("y", Integer.class));
             Rectangle hitbox = ((RectangleMapObject) object).getRectangle();
 

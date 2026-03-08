@@ -1,5 +1,6 @@
 package io.midnight_hills.map;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
@@ -18,6 +19,7 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
     private final int drawSpritesAfterLayer = 3;
     private final int drawShadowAfterLayer = 2;
     private final int drawOverlapAfterLayer = 4;
+    private RayHandler rayHandler;
 
     public OrthogonalTiledMapRendererWithSprites(TiledMap map, SpriteBatch batch) {
         super(map, batch);
@@ -37,6 +39,8 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
     public void addOverlap(Sprite sprite){
         overlaps.add(sprite);
     }
+
+    public void addRayHandler(RayHandler rayHandler) { this.rayHandler = rayHandler;}
     @Override
     public void render() {
         beginRender();
@@ -70,4 +74,5 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
         }
         endRender();
     }
+
 }

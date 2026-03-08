@@ -9,6 +9,8 @@ dependencies {
   api "com.github.tommyettinger:anim8-gdx:$anim8Version"
   api "com.kotcrab.vis:vis-ui:$visUiVersion"
   api "com.badlogicgames.gdx:gdx-tools:+"
+  api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+  api "com.badlogicgames.box2dlights:box2dlights:+"
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"

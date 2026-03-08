@@ -1,5 +1,9 @@
 package io.midnight_hills;
 
+import box2dLight.ConeLight;
+import box2dLight.DirectionalLight;
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -7,18 +11,10 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.*;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -26,7 +22,12 @@ import io.midnight_hills.map.rooms.RoomFactory;
 import io.midnight_hills.map.rooms.RoomManager;
 import io.midnight_hills.npc.NPC;
 import io.midnight_hills.npc.NPCFactory;
+import io.midnight_hills.player.Player;
+import io.midnight_hills.player.Torch;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -37,7 +38,8 @@ public class GameScreen implements Screen {
     private Main game;
 
     private OrthographicCamera camera;
-    private FitViewport port, screenSpacePort;
+    private FitViewport screenSpacePort;
+    private FitViewport port;
 
     private Player player;
     public final int TILE_SIZE = 16; // pixels per tile
@@ -45,28 +47,15 @@ public class GameScreen implements Screen {
     int VIEWPORT_HEIGHT = 144; // in pixels
     private ArrayList<Rectangle> collisionRects = new ArrayList<>();
 
-    private MapLayer foregroundLayers, backgroundLayers, middleLayers, treeLayer;
     private ShaderProgram shaderProgram;
     private Texture noiseTexture;
 
-    private FrameBuffer frameBuffer;
-    private TextureRegion frameRegion;
     private OrthographicCamera screenCamera;
     private float time = 0f;
     private BitmapFont font;
-    private ShapeRenderer shapeRenderer = new ShapeRenderer();
-    private ArrayList<Vector2> points = new ArrayList<>();
-    private PerspectiveCamera persCamera;
-    private ModelBatch modelBatch;
-    private Model bottomModel;
-    private Environment environment;
-    private ModelInstance bottomLayerInstance;
-    private FreeLookCameraController cameraController;
 
-    private TextureAttribute bottomLayerAttr, topLayerAttr;
-    private DirectionalShadowLight sun;
+    private DirectionalLight sun;
     private float lightTime = 0f;
-    private final Matrix4 originalTopTransform = new Matrix4();
 
     private RoomManager roomManager;
     private RoomFactory roomFactory;
@@ -74,6 +63,18 @@ public class GameScreen implements Screen {
     private Vector3 mousePosition;
     private TiledMapTile hoveredTile;
 
+    private RayHandler sunRayHandler, lightsRayHandler;
+    private World world;
+    private float sunAngle = -90.1f;
+    private Color sunColor, sunsetColor, midnightColor;
+    private int lightingMin = 0, lightingMax = 1, sunLevelMin = -40, sunLevelMax = 40;
+    private Torch torch;
+    private float clockTime;
+
+    private enum Meridiem {AM, PM}
+
+    private Meridiem meridiem;
+    private float previousLerp = 0f, lerp = 0f;
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
 
@@ -92,19 +93,6 @@ public class GameScreen implements Screen {
         port = new FitViewport(256, 144, camera);
         camera.update();
 
-        persCamera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        persCamera.position.set(0f, 0f, 12f);
-        persCamera.direction.set(0, 0, -1f);
-        persCamera.near = 0.1f;
-        persCamera.far = 50f;
-        persCamera.update();
-//
-//        backgroundLayers = map.getLayers().get("Background");
-//        middleLayers = map.getLayers().get("Foreground");
-//        foregroundLayers = map.getLayers().get("OverlapPlayer");
-//        treeLayer = map.getLayers().get("Trees");
-
-        player = new Player(assetManager, camera, new Vector2(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f));
 
         String vert = Gdx.files.internal("shaders/test.vertex.glsl").readString();
         String frag = Gdx.files.internal("shaders/test.fragment.glsl").readString();
@@ -122,64 +110,23 @@ public class GameScreen implements Screen {
             throw new GdxRuntimeException(shaderProgram.getLog());
         }
 
-        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888,
-            Gdx.graphics.getWidth(),
-            Gdx.graphics.getHeight(),
-            false);
 
-        frameRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
+        world = new World(Vector2.Zero, true);
+        sunRayHandler = new RayHandler(world);
+        sunRayHandler.setShadows(true);
+        sunRayHandler.setCombinedMatrix(camera);
+        sunRayHandler.setAmbientLight(0f, 0f, 0f, 1f);
+        sunRayHandler.setBlurNum(8);
 
-        String vertexSource = Gdx.files.internal("shaders/my.vertex.glsl").readString();
-        String fragmentSource = Gdx.files.internal("shaders/my.fragment.glsl").readString();
+        lightsRayHandler = new RayHandler(world);
+        lightsRayHandler.setShadows(true);
+        lightsRayHandler.setCombinedMatrix(camera);
+        lightsRayHandler.setAmbientLight(0f, 0f, 0f, 1f);
+        lightsRayHandler.setBlurNum(8);
 
-        DefaultShader.Config config = new DefaultShader.Config(vertexSource, fragmentSource);
+        sun = new DirectionalLight(sunRayHandler, 128, new Color(255, 255, 153, 0.3f), sunAngle);
 
-        modelBatch = new ModelBatch(new DefaultShaderProvider(config));
-
-        ModelBuilder modelBuilder = new ModelBuilder();
-
-
-        //Background layer
-        Material backgroundMaterial = new Material("screen", TextureAttribute.createDiffuse(frameBuffer.getColorBufferTexture()), FloatAttribute.createAlphaTest(0.5f), IntAttribute.createCullFace(GL20.GL_NONE));
-        backgroundMaterial.set(
-            new BlendingAttribute(
-                GL20.GL_SRC_ALPHA,
-                GL20.GL_ONE_MINUS_SRC_ALPHA
-            )
-        );
-        bottomModel = modelBuilder.createRect(
-            -1f, -1f, 0f,
-            1f, -1f, 0f,
-            1f, 1f, 0f,
-            -1f, 1f, 0f,
-            0, 0, 1,
-            backgroundMaterial,
-            VertexAttributes.Usage.Position
-                | VertexAttributes.Usage.TextureCoordinates
-                | VertexAttributes.Usage.Normal
-        );
-
-        bottomLayerInstance = new ModelInstance(bottomModel);
-        bottomLayerInstance.transform.idt();
-        bottomLayerInstance.transform.translate(0f, 0f, 0f);
-
-
-        environment = new Environment();
-        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
-        sun = new DirectionalShadowLight(4096, 4096, 200f, 200f, 1f, 150f);
-        sun.set(2f, 2f, 2f, -1f, -1f, -1f);
-
-
-        environment.shadowMap = sun;
-
-        environment.add(sun);
-
-
-//        cameraController = new FreeLookCameraController(persCamera);
-//        Gdx.input.setCursorCatched(true);
-
-
-        bottomLayerAttr = new TextureAttribute(1, frameRegion);
+        player = new Player(assetManager, camera, new Vector2(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f), world);
 
         Pixmap pixmap = new Pixmap(Gdx.files.internal("assets/ui/cursor.png"));
         int xHotspot = 31, yHotspot = 31;
@@ -200,28 +147,16 @@ public class GameScreen implements Screen {
 
         roomManager.init();
 
-        fitQuadToCamera();
         font = new BitmapFont();
         font.setColor(Color.WHITE);
-    }
 
 
-    private void fitQuadToCamera() {
-        fitInstanceToCamera(bottomLayerInstance);
-    }
+        midnightColor = new Color().set(new Color(0.24f, 0.22f, 0.35f, 1.0f), 0.5f);
+        sunsetColor = new Color().set(new Color(0.78f, 0.76f, 0.55f, 1.0f), 0.5f);
+        sunColor = new Color();
 
-    private void fitInstanceToCamera(ModelInstance instance) {
-        Vector3 pos = instance.transform.getTranslation(new Vector3());
-
-        float distance = persCamera.position.z - pos.z;
-
-        float fovRad = persCamera.fieldOfView * MathUtils.degreesToRadians;
-        float height = 2f * distance * MathUtils.tan(fovRad / 2f);
-        float width = height * persCamera.viewportWidth / persCamera.viewportHeight;
-
-        instance.transform.idt();
-        instance.transform.translate(pos.x, pos.y, pos.z);
-        instance.transform.scale(width / 2f, -height / 2f, 1f);
+        torch = new Torch(player, lightsRayHandler);
+        meridiem = Meridiem.AM;
     }
 
 
@@ -255,8 +190,6 @@ public class GameScreen implements Screen {
 
         camera.update();
         screenCamera.update();
-        persCamera.update();
-
 
     }
 
@@ -292,7 +225,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
 
         time += delta;
-
+        lightTime += delta;
 
         if (delta > 0.025f) {
             System.out.println("DELTA SPIKE: " + delta);
@@ -305,55 +238,73 @@ public class GameScreen implements Screen {
 
         update(delta);
         handleInput(delta);
-//        cameraController.update(delta);
+        torch.move();
+//        System.out.println(new Color().set(sunsetColor));
+//        System.out.println(sunsetColor.lerp(midnightColor, 0.25f));
+//        System.out.println(sunsetColor);
 
+        lerp = oscillate(0f, 1f, 0.3f, lightTime);
+        lerp(midnightColor, sunsetColor, lerp);
+        sun.setColor(sunColor);
 
-        lightTime += delta;
-        float angle = lightTime * 0.9f; // adjust speed here
-        float elevation = 0.5f;
+        //lerp 1 = 12pm, 0 = 12 am
+        //24 hour system, 0 to 24
 
-        Vector3 sunDir = new Vector3(1f, elevation, 0f);
+        if (lerp > 0f && previousLerp < lerp) {
+            meridiem = Meridiem.AM;
+            clockTime = lerp * 11;
+        }
+        if (lerp < 1f && previousLerp > lerp) {
+            meridiem = Meridiem.PM;
+            clockTime = (1 - lerp) * 11;
+        }
+        if(clockTime > 6 && meridiem == Meridiem.PM){
+            torch.hide();
+        }
+        if(clockTime >= 4 && meridiem == Meridiem.AM){
+            torch.show();
+        }
 
-        sunDir.rotate(Vector3.Y, angle).nor();
-        sun.setDirection(sunDir);
-
+//        System.out.println((int)clockTime + " " + meridiem);
+        previousLerp = lerp;
         //Frame buffer with player and tiles on it
-        frameBuffer.begin();
-
         ScreenUtils.clear(0, 0, 0, 1, true);
         batch.setShader(null);
-
         //Render the world
+
         roomManager.render(batch, delta, camera);
-        frameBuffer.end();
-
-
-
-        //3d render to quad
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-        Vector3 scale = new Vector3();
-        originalTopTransform.getScale(scale);
-
-        //Set the instance textures to buffer
-        bottomLayerAttr.textureDescription.set(frameRegion.getTexture(), Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest, Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        bottomLayerInstance.materials.get(0).set(bottomLayerAttr);
-
+        sunRayHandler.setAmbientLight(0, 0, 0, (float) Math.min(lightingMax, Math.max(0.1, lerp)));
+        sunRayHandler.setCombinedMatrix(camera);
+        sunRayHandler.update();
+        sunRayHandler.render();
+//
+//        lightsRayHandler.setAmbientLight(0, 0, 0, (float) Math.min(lightingMax, Math.max(0.1, lerp)));
+        lightsRayHandler.setCombinedMatrix(camera);
+        lightsRayHandler.update();
+        lightsRayHandler.render();
 
         //Render in 3d space for lighting
-        modelBatch.begin(persCamera);
-        modelBatch.render(bottomLayerInstance, environment);
-        modelBatch.end();
         batch.begin();
         batch.setProjectionMatrix(screenCamera.combined);
         font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 1070);
         batch.end();
-
         Gdx.gl.glDisable(GL20.GL_DEPTH_TEST);
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         roomManager.renderFade(screenCamera);
+    }
+
+    private float oscillate(float min, float max, float speed, float time) {
+        float l = min + (max - min) * (0.5f + 0.5f * (float) Math.sin(time * speed));
+        return new BigDecimal(Float.toString(l)).setScale(2, RoundingMode.HALF_UP).floatValue();
+
+    }
+
+    private void lerp(Color from, Color to, float l) {
+        sunColor.r = l * (to.r - from.r) + from.r;
+        sunColor.g = l * (to.g - from.g) + from.g;
+        sunColor.b = l * (to.b - from.b) + from.b;
+        sunColor.a = l * (to.a - from.a) + from.a;
     }
 
 
@@ -362,14 +313,9 @@ public class GameScreen implements Screen {
         if (width <= 0 || height <= 0) return;
         port.update(width, height, true);
 
+        sunRayHandler.useCustomViewport(port.getScreenX(), port.getScreenY(), port.getScreenWidth(), port.getScreenHeight());
+        lightsRayHandler.useCustomViewport(port.getScreenX(), port.getScreenY(), port.getScreenWidth(), port.getScreenHeight());
         screenSpacePort.update(width, height, true);
-        fitQuadToCamera();
-
-        //Recreate the buffers because we resized the screen
-        if (frameBuffer != null) frameBuffer.dispose();
-        frameBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
-        frameRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
-
     }
 
     @Override

@@ -36,5 +36,14 @@ public class PackTextures {
             "assets/packed",               // output folder
             "rockTop"                // atlas name: player.atlas
         );
+
+        TexturePacker.process(
+            settings,
+            "assets/npcs/spiderLady/",   // input folder containing all PNG frames
+            "assets/packed",               // output folder
+            "spiderLady"                // atlas name: player.atlas
+        );
+
+
     }
 }

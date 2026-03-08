@@ -1,4 +1,4 @@
-package io.midnight_hills;
+package io.midnight_hills.player;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -8,6 +8,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.World;
+
 import java.util.ArrayList;
 
 public class Player {
@@ -17,7 +22,7 @@ public class Player {
         idleUpAnimation, idleDownAnimation, idleLeftAnimation, idleRightAnimation;
 
     public enum Direction {LEFT, RIGHT, UP, DOWN}
-
+                           //0    1     2   3
     private Direction direction;
 
     private enum State {IDLE, WALK, JUMP, ATTACK}
@@ -36,8 +41,10 @@ public class Player {
     private Rectangle hitbox = new Rectangle(100, 100, 14, 8);
     private Sprite sprite, shadow;
     private Texture shadowTexture;
+    private Body body;
 
-    public Player(AssetManager assetManager, OrthographicCamera camera, Vector2 startPosition) {
+    public Player(AssetManager assetManager, OrthographicCamera camera, Vector2 startPosition, World world
+    ) {
         this.collisionRects = new ArrayList<>();
         this.camera = camera;
 
@@ -68,9 +75,18 @@ public class Player {
         shadow.setRegion(shadowTexture);
         shadow.setOriginCenter();
 
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+//        CircleShape circleShape = new CircleShape();
+//        circleShape.setRadius(6);
+
+        bodyDef.position.scl(hitbox.x, hitbox.y);
+        body = world.createBody(bodyDef);
+
+
     }
 
-    public void setCollisionRects(ArrayList<Rectangle> collisionRects){
+    public void setCollisionRects(ArrayList<Rectangle> collisionRects) {
         this.collisionRects = collisionRects;
     }
 
@@ -80,7 +96,7 @@ public class Player {
         velocity.y = 0;
         state = State.IDLE;
 
-        if(movementLocked){
+        if (movementLocked) {
             velocity = Vector2.Zero;
             return;
         }
@@ -105,6 +121,10 @@ public class Player {
             state = State.WALK;
         }
 
+    }
+
+    public Body getBody(){
+        return body;
     }
 
 
@@ -195,10 +215,11 @@ public class Player {
         sprite.setRegion(frame);
         sprite.setSize(16, 17);
         sprite.setOriginCenter();
-        sprite.setPosition(hitbox.x-1, hitbox.y);
+        sprite.setPosition(hitbox.x - 1, hitbox.y);
 
-        shadow.setPosition(hitbox.x + (sprite.getWidth()- shadow.getWidth())/2f -1, hitbox.y - 2);
+        shadow.setPosition(hitbox.x + (sprite.getWidth() - shadow.getWidth()) / 2f - 1, hitbox.y - 2);
 
+        body.getPosition().set(hitbox.x, hitbox.y);
 
     }
 
@@ -210,7 +231,7 @@ public class Player {
         return sprite;
     }
 
-    public Sprite getShadow(){
+    public Sprite getShadow() {
         return shadow;
     }
 
@@ -219,6 +240,11 @@ public class Player {
         hitbox.y = entry.y;
         velocity = Vector2.Zero;
     }
+
+    public void faceDirection(Player.Direction face){
+        this.direction = face;
+    }
+
     public void render(SpriteBatch batch, float delta) {
 
     }
