@@ -1,0 +1,13 @@
+
+spiderLady.png
+size: 64, 32
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+idle
+  rotate: false
+  xy: 1, 1
+  size: 39, 30
+  orig: 39, 30
+  offset: 0, 0
+  index: 1

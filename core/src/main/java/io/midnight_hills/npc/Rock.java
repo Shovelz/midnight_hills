@@ -8,9 +8,9 @@ import java.util.ArrayList;
 public class Rock extends NPC {
 
     private ArrayList<Sprite> overlays, shadows, sprite;
-    private Animation<TextureRegion> currentAnimationBottom, currentAnimationTop, wiggleAnimationTop, wiggleAnimationBottom, idleAnimationTop, idleAnimationBottom, bopAnimationBottom, bopAnimationTop;
+    private Animation<TextureRegion> currentAnimation, wiggleAnimation, idleAnimation, bopAnimation;
     private float time = 0;
-    private Sprite top, body;
+    private Sprite body;
 
     private enum State {IDLE, WIGGLE, BOP}
 
@@ -22,36 +22,25 @@ public class Rock extends NPC {
         sprite = new ArrayList<>();
         shadows = new ArrayList<>();
 
-        if (!assetManager.isLoaded("packed/rockBottom.atlas")) {
-            assetManager.load("packed/rockBottom.atlas", TextureAtlas.class);
-            assetManager.load("packed/rockTop.atlas", TextureAtlas.class);
+        if (!assetManager.isLoaded("packed/rock.atlas")) {
+            assetManager.load("packed/rock.atlas", TextureAtlas.class);
             assetManager.finishLoading();
         }
-        TextureAtlas atlasBottom = assetManager.get("packed/rockBottom.atlas");
-        TextureAtlas atlasTop = assetManager.get("packed/rockTop.atlas");
+        TextureAtlas atlas = assetManager.get("packed/rock.atlas");
 
         body = new Sprite();
-        shadows.add(body);
-        top = new Sprite();
-        overlays.add(top);
+        sprite.add(body);
 
-        idleAnimationBottom = new Animation<>(0.1f, atlasBottom.findRegions("idle"), Animation.PlayMode.LOOP);
-        idleAnimationTop = new Animation<>(0.1f, atlasTop.findRegions("idle"), Animation.PlayMode.LOOP);
+        idleAnimation = new Animation<>(0.1f, atlas.findRegions("idle"), Animation.PlayMode.LOOP);
 
-        wiggleAnimationBottom = new Animation<>(0.1f, atlasBottom.findRegions("wiggle"), Animation.PlayMode.NORMAL);
-        wiggleAnimationTop = new Animation<>(0.1f, atlasTop.findRegions("wiggle"), Animation.PlayMode.NORMAL);
+        wiggleAnimation = new Animation<>(0.1f, atlas.findRegions("wiggle"), Animation.PlayMode.NORMAL);
 
-        bopAnimationBottom =  new Animation<>(0.3f, atlasBottom.findRegions("bop"), Animation.PlayMode.NORMAL);
-        bopAnimationTop =  new Animation<>(0.3f, atlasTop.findRegions("bop"), Animation.PlayMode.NORMAL);
+        bopAnimation = new Animation<>(0.3f, atlas.findRegions("bop"), Animation.PlayMode.NORMAL);
 
-        currentAnimationBottom = idleAnimationBottom;
-        currentAnimationTop = idleAnimationTop;
+        currentAnimation = idleAnimation;
 
         body.setSize(20, 13);
         body.setOriginCenter();
-
-        top.setSize(20, 13);
-        top.setOriginCenter();
 
         state = State.IDLE;
     }
@@ -78,52 +67,43 @@ public class Rock extends NPC {
 
         switch (state) {
             case IDLE:
-                currentAnimationTop = idleAnimationTop;
-                currentAnimationBottom = idleAnimationBottom;
+                currentAnimation = idleAnimation;
 
-                body.setRegion(currentAnimationBottom.getKeyFrame(time, true));
-                top.setRegion(currentAnimationTop.getKeyFrame(time, true));
+                body.setRegion(currentAnimation.getKeyFrame(time, true));
                 body.setSize(20, 13);
-                top.setSize(20, 13);
                 break;
             case WIGGLE:
-                if (currentAnimationBottom != wiggleAnimationBottom) {
-                    currentAnimationBottom = wiggleAnimationBottom;
-                    currentAnimationTop = wiggleAnimationTop;
+                if (currentAnimation != wiggleAnimation) {
+                    currentAnimation = wiggleAnimation;
                     time = 0;
                 }
 
-                body.setRegion(currentAnimationBottom.getKeyFrame(time, false));
-                top.setRegion(currentAnimationTop.getKeyFrame(time, false));
 
-                if (currentAnimationBottom.isAnimationFinished(time)) {
+                body.setRegion(currentAnimation.getKeyFrame(time, false));
+
+                if (currentAnimation.isAnimationFinished(time)) {
                     state = State.IDLE;
                     time = 0;
                 }
                 body.setSize(20, 13);
-                top.setSize(20, 13);
                 break;
             case BOP:
 
-                if (currentAnimationBottom != bopAnimationBottom) {
-                    currentAnimationBottom = bopAnimationBottom;
-                    currentAnimationTop = bopAnimationTop;
+                if (currentAnimation != bopAnimation) {
+                    currentAnimation = bopAnimation;
                     time = 0;
                 }
 
-                body.setRegion(currentAnimationBottom.getKeyFrame(time, false));
-                top.setRegion(currentAnimationTop.getKeyFrame(time, false));
-                if (currentAnimationBottom.isAnimationFinished(time)) {
+                body.setRegion(currentAnimation.getKeyFrame(time, false));
+                if (currentAnimation.isAnimationFinished(time)) {
                     state = State.IDLE;
                     time = 0;
                 }
                 body.setSize(20, 19);
-                top.setSize(20, 19);
                 break;
         }
 
         body.setPosition(hitbox.x - 2, hitbox.y + 1);
-        top.setPosition(hitbox.x - 2, hitbox.y + 1);
 
     }
 

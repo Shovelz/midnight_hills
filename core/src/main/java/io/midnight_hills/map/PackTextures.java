@@ -25,16 +25,9 @@ public class PackTextures {
 
         TexturePacker.process(
             settings,
-            "assets/npcs/rock/bottom",   // input folder containing all PNG frames
+            "assets/npcs/rock",   // input folder containing all PNG frames
             "assets/packed",               // output folder
-            "rockBottom"                // atlas name: player.atlas
-        );
-
-        TexturePacker.process(
-            settings,
-            "assets/npcs/rock/top",   // input folder containing all PNG frames
-            "assets/packed",               // output folder
-            "rockTop"                // atlas name: player.atlas
+            "rock"                // atlas name: player.atlas
         );
 
         TexturePacker.process(

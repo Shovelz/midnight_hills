@@ -1,5 +1,5 @@
 
-rockBottom.png
+rock.png
 size: 256, 32
 format: RGBA8888
 filter: Nearest, Nearest
@@ -24,14 +24,14 @@ bop
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 8
+  index: 6
 bop
   rotate: false
   xy: 23, 1
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 6
+  index: 8
 bop
   rotate: false
   xy: 45, 1
@@ -62,36 +62,64 @@ bop
   index: 7
 idle
   rotate: false
-  xy: 133, 7
-  size: 20, 13
-  orig: 20, 13
+  xy: 199, 9
+  size: 18, 11
+  orig: 18, 11
   offset: 0, 0
   index: 1
 wiggle
   rotate: false
-  xy: 133, 7
-  size: 20, 13
-  orig: 20, 13
-  offset: 0, 0
-  index: 3
-wiggle
-  rotate: false
-  xy: 133, 7
-  size: 20, 13
-  orig: 20, 13
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
   offset: 0, 0
   index: 1
 wiggle
   rotate: false
-  xy: 155, 7
-  size: 20, 13
-  orig: 20, 13
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
+  offset: 0, 0
+  index: 4
+wiggle
+  rotate: false
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
   offset: 0, 0
   index: 2
 wiggle
   rotate: false
-  xy: 177, 7
-  size: 20, 13
-  orig: 20, 13
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
   offset: 0, 0
-  index: 4
+  index: 6
+wiggle
+  rotate: false
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
+  offset: 0, 0
+  index: 5
+wiggle
+  rotate: false
+  xy: 133, 1
+  size: 20, 19
+  orig: 20, 19
+  offset: 0, 0
+  index: 8
+wiggle
+  rotate: false
+  xy: 155, 1
+  size: 20, 19
+  orig: 20, 19
+  offset: 0, 0
+  index: 3
+wiggle
+  rotate: false
+  xy: 177, 1
+  size: 20, 19
+  orig: 20, 19
+  offset: 0, 0
+  index: 7

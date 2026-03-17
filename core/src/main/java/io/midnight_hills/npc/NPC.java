@@ -32,8 +32,8 @@ public abstract class NPC {
 
     public void registerSprites(OrthogonalTiledMapRendererWithSprites renderer) {
         for (Sprite s : getSprites()) renderer.addSprite(s);
-        for (Sprite s : getOverlays()) renderer.addOverlap(s);
-        for (Sprite s : getShadows()) renderer.addShadow(s);
+        for (Sprite o : getOverlays()) renderer.addOverlap(o);
+        for (Sprite sh : getShadows()) renderer.addShadow(sh);
     }
     public Rectangle getHitbox() {
         return hitbox;

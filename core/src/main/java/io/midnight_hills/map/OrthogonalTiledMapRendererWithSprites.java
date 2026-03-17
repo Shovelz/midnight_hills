@@ -8,8 +8,11 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRenderer {
@@ -28,19 +31,22 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
         overlaps = new ArrayList<>();
     }
 
-    public void addSprite(Sprite sprite){
+    public void addSprite(Sprite sprite) {
         sprites.add(sprite);
     }
 
-    public void addShadow(Sprite sprite){
+    public void addShadow(Sprite sprite) {
         shadows.add(sprite);
     }
 
-    public void addOverlap(Sprite sprite){
+    public void addOverlap(Sprite sprite) {
         overlaps.add(sprite);
     }
 
-    public void addRayHandler(RayHandler rayHandler) { this.rayHandler = rayHandler;}
+    public void addRayHandler(RayHandler rayHandler) {
+        this.rayHandler = rayHandler;
+    }
+
     @Override
     public void render() {
         beginRender();
@@ -48,21 +54,27 @@ public class OrthogonalTiledMapRendererWithSprites extends OrthogonalTiledMapRen
         for (MapLayer layer : map.getLayers()) {
             if (layer.isVisible()) {
                 if (layer instanceof TiledMapTileLayer) {
-                    renderTileLayer((TiledMapTileLayer)layer);
+                    renderTileLayer((TiledMapTileLayer) layer);
                     currentLayer++;
-                    if(currentLayer == drawSpritesAfterLayer){
-                        for(Sprite sprite : sprites)
-                            if(sprite.getTexture() != null)
+                    if (currentLayer == drawSpritesAfterLayer) {
+                        sprites.sort((Sprite a, Sprite b) -> (int) (b.getY() - a.getY()));
+
+                        for (Sprite sprite : sprites) {
+                            System.out.println(sprite);
+                            if (sprite.getTexture() != null){
                                 sprite.draw(batch);
+                            }
+                        }
                     }
-                    if(currentLayer == drawShadowAfterLayer){
-                        for(Sprite shadow: shadows)
-                            if(shadow.getTexture() != null)
+                    if (currentLayer == drawShadowAfterLayer) {
+                        for (Sprite shadow : shadows)
+                            if (shadow.getTexture() != null)
                                 shadow.draw(batch);
                     }
-                    if(currentLayer == drawOverlapAfterLayer){
-                        for(Sprite overlap : overlaps)
-                            if(overlap.getTexture() != null)
+
+                    if (currentLayer == drawOverlapAfterLayer) {
+                        for (Sprite overlap : overlaps)
+                            if (overlap.getTexture() != null)
                                 overlap.draw(batch);
                     }
                 } else {
