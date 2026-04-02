@@ -211,4 +211,24 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
+ <tile id="168">
+  <properties>
+   <property name="animation" value="waterTop"/>
+  </properties>
+ </tile>
+ <tile id="169">
+  <properties>
+   <property name="animation" value="waterTop"/>
+  </properties>
+ </tile>
+ <tile id="170">
+  <properties>
+   <property name="animation" value="waterBottom"/>
+  </properties>
+ </tile>
+ <tile id="171">
+  <properties>
+   <property name="animation" value="waterBottom"/>
+  </properties>
+ </tile>
 </tileset>

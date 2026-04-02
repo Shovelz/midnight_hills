@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -149,6 +151,7 @@ public class RoomManager {
         player.setCollisionRects(collisionRects);
 
         map = room.getMap();
+
         mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
         mapRenderer.addSprite(player.getSprite());
         mapRenderer.addShadow(player.getShadow());
@@ -157,7 +160,6 @@ public class RoomManager {
         for (NPC npc : room.getNpcs()) {
             npc.registerSprites(mapRenderer);
         }
-        System.out.println("Created in render loop");
     }
 
 
