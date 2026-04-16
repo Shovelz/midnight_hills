@@ -11,6 +11,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.*;
@@ -27,7 +28,6 @@ import io.midnight_hills.player.Torch;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 
@@ -75,6 +75,7 @@ public class GameScreen implements Screen {
 
     private Meridiem meridiem;
     private float previousLerp = 0f, lerp = 0f;
+    private FrameBuffer fbo;
 
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
 
@@ -93,6 +94,7 @@ public class GameScreen implements Screen {
         port = new FitViewport(256, 144, camera);
         camera.update();
 
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888,1920, 1080, false);
 
         String vert = Gdx.files.internal("shaders/test.vertex.glsl").readString();
         String frag = Gdx.files.internal("shaders/test.fragment.glsl").readString();
@@ -102,6 +104,8 @@ public class GameScreen implements Screen {
 
         // Cloud shader (not currently in use)
         shaderProgram = new ShaderProgram(vert, frag);
+//        noiseTexture.bind(0);
+//        shaderProgram.setUniformi("u_texture", 0);
 
         if (shaderProgram.isCompiled()) {
             System.out.println("Compiled Successfully");
@@ -239,6 +243,7 @@ public class GameScreen implements Screen {
         update(delta);
         handleInput(delta);
         torch.move();
+
 //        System.out.println(new Color().set(sunsetColor));
 //        System.out.println(sunsetColor.lerp(midnightColor, 0.25f));
 //        System.out.println(sunsetColor);
@@ -269,21 +274,29 @@ public class GameScreen implements Screen {
         previousLerp = lerp;
         //Frame buffer with player and tiles on it
         ScreenUtils.clear(0, 0, 0, 1, true);
-        batch.setShader(null);
         //Render the world
-
+        batch.setProjectionMatrix(camera.combined);
+//        batch.setShader(shaderProgram);
+        batch.setShader(null);
+        fbo.begin();
         roomManager.render(batch, delta, camera);
+        fbo.end();
+
+
+//        batch.setProjectionMatrix(camera.combined);
+        //Render in 3d space for lighting
+        batch.setShader(shaderProgram);
+        batch.begin();
+        batch.draw(fbo.getColorBufferTexture(),camera.position.x - 256/2.0f, camera.position.y - 144/2.0f, 256, 144, 0, 0, 1, 1);
+        batch.end();
         sunRayHandler.setAmbientLight(0, 0, 0, (float) Math.min(lightingMax, Math.max(0.1, lerp)));
         sunRayHandler.setCombinedMatrix(camera);
         sunRayHandler.update();
         sunRayHandler.render();
-//
 //        lightsRayHandler.setAmbientLight(0, 0, 0, (float) Math.min(lightingMax, Math.max(0.1, lerp)));
         lightsRayHandler.setCombinedMatrix(camera);
         lightsRayHandler.update();
         lightsRayHandler.render();
-
-        //Render in 3d space for lighting
         batch.begin();
         batch.setProjectionMatrix(screenCamera.combined);
         font.draw(batch, "FPS " + Gdx.graphics.getFramesPerSecond(), 10, 1070);
