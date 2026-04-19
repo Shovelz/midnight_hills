@@ -1,0 +1,11 @@
+{
+"name": "Midnight Hills",
+"assetPath": "assets",
+"pluginsData": {
+	"gdx-graph": {
+		"graphs": [
+			{ "name": "Pipeline", "graphType": "Render_Pipeline", "path": "shaders/pipeline.rnp" }
+		]
+	}
+}
+}

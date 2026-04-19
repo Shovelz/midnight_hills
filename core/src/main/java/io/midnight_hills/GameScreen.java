@@ -16,7 +16,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.midnight_hills.map.rooms.RoomFactory;
@@ -29,7 +28,6 @@ import io.midnight_hills.player.Torch;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-
 
 public class GameScreen implements Screen {
 
@@ -77,6 +75,9 @@ public class GameScreen implements Screen {
     private float previousLerp = 0f, lerp = 0f;
     private FrameBuffer fbo;
 
+    //I don't have to win, you just have to lose
+    // I will not let you destroy my world
+    //LET THE PAIN RUN THOUGH YOU, LET IT MOLD YOU INTO AN UNSTOPPABLE FORCE, I BELIEVE IN YOU
     public GameScreen(SpriteBatch batch, AssetManager assetManager, Main game) {
 
         this.batch = batch;
@@ -96,24 +97,9 @@ public class GameScreen implements Screen {
 
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888,1920, 1080, false);
 
-        String vert = Gdx.files.internal("shaders/test.vertex.glsl").readString();
-        String frag = Gdx.files.internal("shaders/test.fragment.glsl").readString();
 
         noiseTexture = new Texture("shaders/perlin.jpg");
         noiseTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
-
-        // Cloud shader (not currently in use)
-        shaderProgram = new ShaderProgram(vert, frag);
-//        noiseTexture.bind(0);
-//        shaderProgram.setUniformi("u_texture", 0);
-
-        if (shaderProgram.isCompiled()) {
-            System.out.println("Compiled Successfully");
-            batch.setShader(shaderProgram);
-        } else {
-            throw new GdxRuntimeException(shaderProgram.getLog());
-        }
-
 
         world = new World(Vector2.Zero, true);
         sunRayHandler = new RayHandler(world);
@@ -138,7 +124,7 @@ public class GameScreen implements Screen {
         pixmap.dispose();
         Gdx.graphics.setCursor(cursor);
 
-        roomManager = new RoomManager(player, batch);
+        roomManager = new RoomManager(player, batch, camera);
         npcFactory = new NPCFactory(assetManager);
         roomFactory = new RoomFactory(assetManager, npcFactory);
 
@@ -278,16 +264,14 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
 //        batch.setShader(shaderProgram);
         batch.setShader(null);
-        fbo.begin();
         roomManager.render(batch, delta, camera);
-        fbo.end();
 
 
 //        batch.setProjectionMatrix(camera.combined);
         //Render in 3d space for lighting
         batch.setShader(shaderProgram);
         batch.begin();
-        batch.draw(fbo.getColorBufferTexture(),camera.position.x - 256/2.0f, camera.position.y - 144/2.0f, 256, 144, 0, 0, 1, 1);
+//        batch.draw(fbo.getColorBufferTexture(),camera.position.x - 256/2.0f, camera.position.y - 144/2.0f, 256, 144, 0, 0, 1, 1);
         batch.end();
         sunRayHandler.setAmbientLight(0, 0, 0, (float) Math.min(lightingMax, Math.max(0.1, lerp)));
         sunRayHandler.setCombinedMatrix(camera);

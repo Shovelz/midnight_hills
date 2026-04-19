@@ -1,5 +1,6 @@
 package io.midnight_hills.map.rooms;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -9,9 +10,11 @@ import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import io.midnight_hills.GameScreen;
 import io.midnight_hills.player.Player;
 import io.midnight_hills.map.OrthogonalTiledMapRendererWithSprites;
 import io.midnight_hills.npc.NPC;
+import org.lwjgl.Sys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,11 +41,14 @@ public class RoomManager {
     private ShapeRenderer fadeRenderer = new ShapeRenderer();
 
     private Door pendingDoor;
+    private float time = 0f;
+    private Camera camera;
 
-    public RoomManager(Player player, SpriteBatch batch) {
+    public RoomManager(Player player, SpriteBatch batch, Camera camera) {
         rooms = new HashMap<>();
         this.player = player;
         this.batch = batch;
+        this.camera = camera;
     }
 
     public void init() {
@@ -108,7 +114,7 @@ public class RoomManager {
 
     public void render(SpriteBatch batch, float delta, OrthographicCamera camera) {
         mapRenderer.setView(camera);
-        mapRenderer.render();
+        mapRenderer.render(delta);
     }
 
     public void renderFade(OrthographicCamera camera) {
@@ -152,9 +158,10 @@ public class RoomManager {
 
         map = room.getMap();
 
-        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch);
+        mapRenderer = new OrthogonalTiledMapRendererWithSprites(map, batch, camera, player);
         mapRenderer.addSprite(player.getSprite());
         mapRenderer.addShadow(player.getShadow());
+
 //        mapRenderer.addRayHandler();
 
         for (NPC npc : room.getNpcs()) {
