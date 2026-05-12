@@ -2,12 +2,13 @@ package io.midnight_hills.npc;
 
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
+import io.midnight_hills.render.SpriteRenderable;
 
 import java.util.ArrayList;
 
 public class SpiderLady extends NPC {
 
-    private ArrayList<Sprite> overlays, shadows, sprite;
+    private ArrayList<SpriteRenderable> overlays, shadows, sprite;
     private Animation<TextureRegion> currentAnimation, idleAnimation;
     private float time = 0;
     private Sprite body;
@@ -17,7 +18,7 @@ public class SpiderLady extends NPC {
     private State state;
 
     public SpiderLady(NPCContext ctx) {
-        super(ctx.name, new Rectangle(ctx.pos.x, ctx.pos.y, 14,9), ctx.map, ctx.assetManager);
+        super(ctx.name, new Rectangle(ctx.pos.x, ctx.pos.y, 32,21), ctx.map, ctx.assetManager, ctx.dialogueManager);
         overlays = new ArrayList<>();
         sprite = new ArrayList<>();
         shadows = new ArrayList<>();
@@ -29,7 +30,7 @@ public class SpiderLady extends NPC {
         TextureAtlas atlas = assetManager.get("packed/spiderLady.atlas");
 
         body = new Sprite();
-        sprite.add(body);
+        sprite.add(new SpriteRenderable(body, 2f, hitbox, "Spiderlady"));
 
         idleAnimation = new Animation<>(0.1f, atlas.findRegions("idle"), Animation.PlayMode.LOOP);
 
@@ -42,20 +43,19 @@ public class SpiderLady extends NPC {
     }
 
     @Override
-    public ArrayList<Sprite> getShadows() {
+    public ArrayList<SpriteRenderable> getShadows() {
         return shadows;
     }
 
     @Override
-    public ArrayList<Sprite> getOverlays() {
+    public ArrayList<SpriteRenderable> getOverlays() {
         return overlays;
     }
 
     @Override
-    public ArrayList<Sprite> getSprites() {
+    public ArrayList<SpriteRenderable> getSprites() {
         return sprite;
     }
-
     @Override
     public void update(float delta) {
         time += delta;

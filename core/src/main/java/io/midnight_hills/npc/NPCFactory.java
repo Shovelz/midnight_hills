@@ -7,6 +7,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import io.midnight_hills.dialogue.DialogueManager;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,9 +16,11 @@ public class NPCFactory {
 
     private final AssetManager assetManager;
     private final Map<String, Function<NPCContext, NPC>> registry = new HashMap<>();
+    private final DialogueManager dialogueManager;
 
-    public NPCFactory(AssetManager assetManager) {
+    public NPCFactory(AssetManager assetManager, DialogueManager dialogueManager) {
         this.assetManager = assetManager;
+        this.dialogueManager = dialogueManager;
 
         register("Rock", Rock::new);
         register("SpiderLady", SpiderLady::new);
@@ -36,11 +39,12 @@ public class NPCFactory {
 
         Function<NPCContext, NPC> ctor = registry.get(npcId);
         if (ctor == null) {
-            throw new RuntimeException("Unknown npc id: " + npcId);
+            return null;
+//            throw new RuntimeException("Unknown npc id: " + npcId);
         }
 
 
-        NPCContext ctx = new NPCContext(npcId, map, new Vector2(hitbox.x, hitbox.y), assetManager);
+        NPCContext ctx = new NPCContext(npcId, map, new Vector2(hitbox.x, hitbox.y), assetManager, dialogueManager);
 
         return ctor.apply(ctx);
 

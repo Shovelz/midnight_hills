@@ -67,8 +67,13 @@ public class RoomFactory {
         }
 
         ArrayList<NPC> npcs = new ArrayList<>();
-        for (MapObject npc : map.getLayers().get("Npcs").getObjects()) {
-            npcs.add(npcFactory.create(npc, map));
+        for (MapObject npcMapObject : map.getLayers().get("Npcs").getObjects()) {
+            NPC npc = npcFactory.create(npcMapObject, map);
+            if(npc == null) break;
+            System.out.println("\n\nNPC Created: ");
+            System.out.println(npcMapObject.getProperties().get("name"));
+            System.out.println(npc.getHitbox());
+            npcs.add(npc);
         }
 
         Function<RoomContext, Room> ctor = registry.get(roomId);

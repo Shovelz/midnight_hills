@@ -1,89 +1,89 @@
 
 player.png
-size: 512, 32
+size: 128, 128
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 idleDown
   rotate: false
-  xy: 1, 9
+  xy: 1, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkDown
   rotate: false
-  xy: 1, 9
+  xy: 1, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 idleDown
   rotate: false
-  xy: 19, 9
+  xy: 1, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 idleLeft
   rotate: false
-  xy: 37, 9
+  xy: 19, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkLeft
   rotate: false
-  xy: 37, 9
+  xy: 19, 104
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 8
+walkLeft
+  rotate: false
+  xy: 19, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 4
-walkLeft
-  rotate: false
-  xy: 37, 9
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 2
 idleRight
   rotate: false
-  xy: 55, 9
+  xy: 1, 66
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkRight
   rotate: false
-  xy: 55, 9
+  xy: 1, 66
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 8
+walkRight
+  rotate: false
+  xy: 1, 66
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 4
-walkRight
-  rotate: false
-  xy: 55, 9
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 2
 idleUp
   rotate: false
-  xy: 73, 9
+  xy: 19, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 0
 walkUp
   rotate: false
-  xy: 73, 9
+  xy: 19, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 6
 walkUp
   rotate: false
-  xy: 73, 9
+  xy: 19, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
@@ -97,147 +97,210 @@ playerShadow
   index: -1
 walkDown
   rotate: false
-  xy: 91, 9
+  xy: 37, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 2
 walkDown
   rotate: false
-  xy: 109, 9
+  xy: 1, 47
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
 walkDown
   rotate: false
-  xy: 127, 9
+  xy: 19, 66
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 4
 walkDown
   rotate: false
-  xy: 145, 9
+  xy: 37, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 5
 walkDown
   rotate: false
-  xy: 163, 9
+  xy: 55, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 6
 walkDown
   rotate: false
-  xy: 181, 9
+  xy: 1, 28
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 7
 walkDown
   rotate: false
-  xy: 199, 9
+  xy: 19, 47
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 8
 walkDown
   rotate: false
-  xy: 217, 9
+  xy: 37, 66
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 9
 walkDown
   rotate: false
-  xy: 235, 9
+  xy: 55, 85
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 10
 walkLeft
   rotate: false
-  xy: 253, 9
+  xy: 1, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 walkLeft
   rotate: false
-  xy: 271, 9
+  xy: 19, 28
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 2
+walkLeft
+  rotate: false
+  xy: 37, 47
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
+walkLeft
+  rotate: false
+  xy: 55, 66
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 5
+walkLeft
+  rotate: false
+  xy: 73, 85
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 6
+walkLeft
+  rotate: false
+  xy: 91, 104
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 7
+walkLeft_
+  rotate: false
+  xy: 73, 104
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: -1
 walkRight
   rotate: false
-  xy: 289, 9
+  xy: 19, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 1
 walkRight
   rotate: false
-  xy: 307, 9
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 3
-walkUp
-  rotate: false
-  xy: 325, 9
+  xy: 37, 28
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 2
-walkUp
+walkRight
   rotate: false
-  xy: 343, 9
+  xy: 55, 47
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 3
-walkUp
+walkRight
   rotate: false
-  xy: 361, 9
-  size: 16, 17
-  orig: 16, 17
-  offset: 0, 0
-  index: 4
-walkUp
-  rotate: false
-  xy: 379, 9
+  xy: 73, 66
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 5
-walkUp
+walkRight
   rotate: false
-  xy: 397, 9
+  xy: 91, 85
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 6
+walkRight
+  rotate: false
+  xy: 109, 104
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 7
 walkUp
   rotate: false
-  xy: 415, 9
+  xy: 37, 9
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 2
+walkUp
+  rotate: false
+  xy: 55, 28
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 3
+walkUp
+  rotate: false
+  xy: 73, 47
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 4
+walkUp
+  rotate: false
+  xy: 91, 66
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 5
+walkUp
+  rotate: false
+  xy: 109, 85
+  size: 16, 17
+  orig: 16, 17
+  offset: 0, 0
+  index: 7
+walkUp
+  rotate: false
+  xy: 55, 9
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 8
 walkUp
   rotate: false
-  xy: 433, 9
+  xy: 73, 28
   size: 16, 17
   orig: 16, 17
   offset: 0, 0
   index: 9
 walkUp
   rotate: false
-  xy: 451, 9
+  xy: 91, 47
   size: 16, 17
   orig: 16, 17
   offset: 0, 0

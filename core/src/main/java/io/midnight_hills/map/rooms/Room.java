@@ -41,6 +41,10 @@ public abstract class Room {
         return npcs;
     }
 
+    public boolean isIndoors(){
+        return map.getProperties().containsKey("indoors") ? map.getProperties().containsKey("indoors") : false;
+    }
+
     protected void loadAnimatedTiles() {
         Map<String, Array<StaticTiledMapTile>> frameTiles = new HashMap<>();
 

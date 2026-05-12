@@ -24,14 +24,14 @@ bop
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 6
+  index: 8
 bop
   rotate: false
   xy: 23, 1
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 8
+  index: 6
 bop
   rotate: false
   xy: 45, 1
@@ -80,14 +80,14 @@ wiggle
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 4
+  index: 5
 wiggle
   rotate: false
   xy: 133, 1
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 2
+  index: 8
 wiggle
   rotate: false
   xy: 133, 1
@@ -101,14 +101,14 @@ wiggle
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 5
+  index: 4
 wiggle
   rotate: false
   xy: 133, 1
   size: 20, 19
   orig: 20, 19
   offset: 0, 0
-  index: 8
+  index: 2
 wiggle
   rotate: false
   xy: 155, 1

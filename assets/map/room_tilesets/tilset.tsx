@@ -131,6 +131,11 @@
    <property name="id" type="int" value="1"/>
   </properties>
  </tile>
+ <tile id="89">
+  <properties>
+   <property name="animation" value="grass1"/>
+  </properties>
+ </tile>
  <tile id="100">
   <properties>
    <property name="id" type="int" value="1"/>
@@ -159,6 +164,11 @@
  <tile id="105">
   <properties>
    <property name="id" type="int" value="1"/>
+  </properties>
+ </tile>
+ <tile id="109">
+  <properties>
+   <property name="animation" value="grass1"/>
   </properties>
  </tile>
  <tile id="120">

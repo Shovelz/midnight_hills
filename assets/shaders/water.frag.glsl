@@ -26,7 +26,6 @@ const float RIPPLE_SIZE = 2.0;
 
 uniform sampler2D u_reflectionTex; // player reflection
 
-
 mat2 rotate2D(float r) {
     return mat2(cos(r), sin(r), -sin(r), cos(r));
 }
@@ -44,10 +43,12 @@ vec2 hash22(vec2 p) {
 }
 
 void main() {
+    float time = u_time;
     vec2 uv = v_texCoords;
-    vec3 color = texture2D(u_screenTexture, uv).rgb;
+//    vec3 color = texture2D(u_screenTexture, uv).rgb;
     // screen UV (0–1 across screen)
-    vec2 screenUV = gl_FragCoord.xy / u_resolution;
+//    vec2 screenUV = gl_FragCoord.xy / u_resolution;
+    vec2 screenUV = v_texCoords;
 
     vec4 reflection = texture2D(u_reflectionTex, v_texCoords);
 
@@ -62,7 +63,7 @@ void main() {
 
             if (fract(hash12(cell) * 123.456) < u_intensity) {
                 vec2 p = cell + hash22(cell);
-                float t = fract(0.3 * u_time + hash12(cell));
+                float t = fract(0.3 * time + hash12(cell));
 
                 vec2 v = p - uv_scaled;
                 v.y *= 1.5;
@@ -86,8 +87,8 @@ void main() {
 
     // --- DISTORTION ---
     vec2 wave_offset = vec2(
-    sin(uv.x * 10.0 + u_time),
-    cos(uv.y * 10.0 + u_time)
+    sin(uv.x * 10.0 + time),
+    cos(uv.y * 10.0 + time)
     ) * 0.005;
 
     vec2 distortion = ripple_offset * u_intensity + wave_offset;
@@ -132,7 +133,7 @@ void main() {
         wave_uv *= rot;
         wave_n *= rot;
 
-        vec2 q = wave_uv * S + j + wave_n + u_time;
+        vec2 q = wave_uv * S + j + wave_n + time;
 
         wave_n += sin(q);
         wave_sum += cos(q) / S;
@@ -142,8 +143,7 @@ void main() {
 
     float wave_len = max(length(wave_sum), 0.001);
 
-    vec3 wave_highlight = vec3(1.0) *
-    pow((wave_sum.x + wave_sum.y + 0.4) + 0.005 / wave_len, HIGHLIGHT_POW);
+    vec3 wave_highlight = vec3(1.0) * pow(max((wave_sum.x + wave_sum.y + 0.4) + 0.005 / wave_len, 0.0), HIGHLIGHT_POW);
 
     float brightness = dot(wave_highlight, vec3(0.299, 0.587, 0.114));
     float blend_factor = smoothstep(1.3, 1.301, brightness);
@@ -156,12 +156,13 @@ void main() {
 
     vec4 refl = texture2D(u_reflectionTex, uv_distorted);
 
+    //Multipy to mix with the water alpha
     refl.a *= alpha;
-
     refl.rgb *= 0.6;
     refl.a *= 0.8;
 
     vec3 combined = mix(water.rgb, refl.rgb, refl.a);
 
+//    gl_FragColor = vec4(vec3(sin(u_time)), 1.0);
     gl_FragColor = vec4(combined, water.a) * v_color;
 }

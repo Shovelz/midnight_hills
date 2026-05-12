@@ -15,7 +15,7 @@ public class Torch {
     public Torch(Player player, RayHandler rayHandler){
         this.player = player;
 
-        light = new PointLight(rayHandler, 128, new Color(0.96f, 1, 0.53f, 0.6f), 30, player.getHitbox().x, player.getHitbox().y);
+        light = new PointLight(rayHandler, 128, new Color(0.96f, 1, 0.53f, 0.88f), 50, player.getHitbox().x, player.getHitbox().y);
 //        light.attachToBody(player.getBody());
     }
 

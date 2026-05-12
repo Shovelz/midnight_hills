@@ -2,12 +2,14 @@ package io.midnight_hills.npc;
 
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
+import io.midnight_hills.dialogue.DialogueManager;
+import io.midnight_hills.render.SpriteRenderable;
 
 import java.util.ArrayList;
 
 public class Rock extends NPC {
 
-    private ArrayList<Sprite> overlays, shadows, sprite;
+    private ArrayList<SpriteRenderable> overlays, shadows, sprite;
     private Animation<TextureRegion> currentAnimation, wiggleAnimation, idleAnimation, bopAnimation;
     private float time = 0;
     private Sprite body;
@@ -17,7 +19,7 @@ public class Rock extends NPC {
     private State state;
 
     public Rock(NPCContext ctx) {
-        super(ctx.name, new Rectangle(ctx.pos.x, ctx.pos.y, 14, 9), ctx.map, ctx.assetManager);
+        super(ctx.name, new Rectangle(ctx.pos.x, ctx.pos.y, 14, 9), ctx.map, ctx.assetManager, ctx.dialogueManager);
         overlays = new ArrayList<>();
         sprite = new ArrayList<>();
         shadows = new ArrayList<>();
@@ -26,10 +28,11 @@ public class Rock extends NPC {
             assetManager.load("packed/rock.atlas", TextureAtlas.class);
             assetManager.finishLoading();
         }
+
         TextureAtlas atlas = assetManager.get("packed/rock.atlas");
 
         body = new Sprite();
-        sprite.add(body);
+        sprite.add(new SpriteRenderable(body, 2.0f, hitbox, "Rock"));
 
         idleAnimation = new Animation<>(0.1f, atlas.findRegions("idle"), Animation.PlayMode.LOOP);
 
@@ -46,24 +49,23 @@ public class Rock extends NPC {
     }
 
     @Override
-    public ArrayList<Sprite> getShadows() {
+    public ArrayList<SpriteRenderable> getShadows() {
         return shadows;
     }
 
     @Override
-    public ArrayList<Sprite> getOverlays() {
+    public ArrayList<SpriteRenderable> getOverlays() {
         return overlays;
     }
 
     @Override
-    public ArrayList<Sprite> getSprites() {
+    public ArrayList<SpriteRenderable> getSprites() {
         return sprite;
     }
 
     @Override
     public void update(float delta) {
         time += delta;
-
 
         switch (state) {
             case IDLE:
@@ -116,6 +118,7 @@ public class Rock extends NPC {
     public void clicked(float delta) {
         if (state == State.IDLE) {
             state = State.BOP;
+            dialogueManager.addDialogue("I'm rockin it sooo hard rn");
 //            state = State.WIGGLE;
         }
     }
